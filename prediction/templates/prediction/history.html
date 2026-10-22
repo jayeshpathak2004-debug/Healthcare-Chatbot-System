@@ -1,0 +1,638 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+.history-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+/* Title */
+.history-title {
+    margin-bottom: 1.5rem;
+}
+
+.history-title h2 {
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.1rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.history-title p {
+    margin: .5rem 0 0;
+    color: var(--slate);
+}
+
+/* Count */
+.history-count {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .65rem 1.1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--blue), var(--coral));
+    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: .85rem;
+    font-weight: 600;
+    box-shadow: 0 10px 22px -12px rgba(79, 168, 201, .45);
+}
+
+/* Search */
+.search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(11, 22, 32, .18);
+}
+
+.search-input {
+    flex: 1;
+    min-width: 0;
+    padding: .8rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #F5F8F7;
+    color: #1E2D3D;
+    font-family: 'Inter', sans-serif;
+    font-size: .9rem;
+    outline: none;
+    transition: .2s ease;
+}
+
+.search-input:focus {
+    border-color: var(--blue);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(79, 168, 201, .16);
+}
+
+.search-input::placeholder {
+    color: #8497A3;
+}
+
+.search-btn,
+.reset-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    padding: .8rem 1.15rem;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.search-btn {
+    border: none;
+    background: linear-gradient(135deg, var(--blue), var(--navy));
+    color: white;
+}
+
+.search-btn:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, var(--coral), var(--blue));
+    box-shadow: 0 10px 20px -10px rgba(79, 168, 201, .5);
+}
+
+.reset-btn {
+    border: 1px solid var(--line);
+    background: #F5F8F7;
+    color: #1E2D3D;
+}
+
+.reset-btn:hover {
+    border-color: var(--coral);
+    color: #C96A3F;
+}
+
+/* Search hint — tells the user the ML table searches by
+   disease name, not model, since that field differs */
+.search-hint {
+    margin: -1.4rem 0 1.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: .78rem;
+    color: var(--slate);
+}
+
+/* Disease section wrapper */
+.history-section {
+    margin-bottom: 2.5rem;
+}
+
+.history-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Table header */
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-radius: 16px 16px 0 0;
+    background: linear-gradient(135deg, var(--navy), var(--blue), var(--coral));
+    color: white;
+}
+
+.table-header.ml-header {
+    background: linear-gradient(135deg, var(--navy), var(--cyan), var(--blue));
+}
+
+.table-header h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.table-header span {
+    display: block;
+    margin-top: .3rem;
+    font-size: .78rem;
+    opacity: .85;
+}
+
+.ml-tag {
+    padding: .3rem .65rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .18);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+}
+
+/* Table */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    background: var(--card);
+    border-radius: 0 0 16px 16px;
+    border: 1px solid var(--line);
+    border-top: none;
+    box-shadow: 0 14px 32px rgba(11, 22, 32, .14);
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.history-table th {
+    padding: 1rem;
+    text-align: left;
+    background: #F3F7F6;
+    color: #1E2D3D;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    border-bottom: 1px solid var(--line);
+}
+
+.history-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--line);
+    color: #1E2D3D;
+    font-size: .88rem;
+}
+
+.history-table tbody tr {
+    transition: background .2s ease;
+}
+
+.history-table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(79, 168, 201, .07), rgba(244, 168, 139, .07));
+}
+
+.history-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ID */
+.record-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    color: var(--blue);
+    font-weight: 600;
+}
+
+/* Prediction */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .4rem .75rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.status-positive {
+    background: rgba(244, 168, 139, .18);
+    color: #C96A3F;
+}
+
+.status-negative {
+    background: rgba(111, 214, 160, .16);
+    color: #2f7d54;
+}
+
+/* Model */
+.model-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    color: #6E8291;
+}
+
+/* Date */
+.date-text {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    white-space: nowrap;
+    color: #6E8291;
+    font-size: .8rem;
+}
+
+.date-text i {
+    color: var(--coral);
+}
+
+/* ML-specific cells */
+.ml-disease-name {
+    font-weight: 700;
+    color: #1E2D3D;
+}
+
+.ml-symptoms-cell {
+    display: block;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #6E8291;
+    font-size: .82rem;
+    cursor: default;
+}
+
+.confidence-cell {
+    min-width: 120px;
+}
+
+.confidence-cell > span {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: .82rem;
+    color: var(--blue);
+}
+
+.confidence-track {
+    width: 100%;
+    height: 5px;
+    margin-top: .4rem;
+    background: #E7EEF0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.confidence-fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+}
+
+/* Empty */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem !important;
+}
+
+.empty-icon {
+    width: 62px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(79, 168, 201, .16), rgba(244, 168, 139, .16));
+    color: var(--blue);
+    font-size: 1.4rem;
+}
+
+.empty-state h4 {
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    color: #1E2D3D;
+}
+
+.empty-state p {
+    margin: .5rem 0 0;
+    color: #6E8291;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+    .history-page { padding: 2rem 1rem; }
+    .history-title h2 { font-size: 1.6rem; }
+
+    .search-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-btn,
+    .reset-btn {
+        width: 100%;
+    }
+
+    .table-header { padding: 1rem; }
+    .ml-symptoms-cell { max-width: 140px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-page">
+
+    <div class="history-title">
+        <h2>Prediction History</h2>
+        <p>View previous diabetes, heart disease and AI symptom prediction records</p>
+    </div>
+
+    <div class="history-count">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        Prediction Records
+    </div>
+
+    <!-- SEARCH -->
+    <form method="GET">
+        <div class="search-wrapper">
+            <input
+                type="text"
+                name="q"
+                class="search-input"
+                placeholder="Search diabetes/heart by model, or ML by disease name..."
+                value="{{ query }}"
+            >
+
+            <button class="search-btn" type="submit">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                Search
+            </button>
+
+            <a href="{% url 'history' %}" class="reset-btn">
+                <i class="fa-solid fa-rotate-left"></i>
+                Reset
+            </a>
+        </div>
+    </form>
+    <p class="search-hint">Searches diabetes and heart records by model used, and AI symptom records by predicted disease.</p>
+
+    <!-- ===================================================== -->
+    <!-- DIABETES HISTORY -->
+    <!-- ===================================================== -->
+    <div class="history-section">
+
+        <div class="table-header">
+            <div>
+                <h3>
+                    <i class="fa-solid fa-droplet"></i>
+                    Diabetes Predictions
+                </h3>
+                <span>Latest diabetes prediction activity</span>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Age</th>
+                        <th>Glucose</th>
+                        <th>BMI</th>
+                        <th>Prediction</th>
+                        <th>Probability</th>
+                        <th>Model</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in diabetes_records %}
+                    <tr>
+                        <td><span class="record-id">#{{ record.id }}</span></td>
+                        <td>{{ record.age }}</td>
+                        <td>{{ record.glucose }}</td>
+                        <td>{{ record.bmi }}</td>
+                        <td>
+                            {% if record.prediction == 1 %}
+                            <span class="status-badge status-positive">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                Positive
+                            </span>
+                            {% else %}
+                            <span class="status-badge status-negative">
+                                <i class="fa-solid fa-circle-check"></i>
+                                Negative
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ record.probability }}%</td>
+                        <td><span class="model-name">{{ record.model_used }}</span></td>
+                        <td>
+                            <span class="date-text">
+                                <i class="fa-regular fa-calendar"></i>
+                                {{ record.created_at|date:"d M Y H:i" }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fa-solid fa-folder-open"></i>
+                            </div>
+                            <h4>No diabetes predictions</h4>
+                            <p>There are currently no diabetes prediction records.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- HEART DISEASE HISTORY -->
+    <!-- ===================================================== -->
+    <div class="history-section">
+
+        <div class="table-header">
+            <div>
+                <h3>
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    Heart Disease Predictions
+                </h3>
+                <span>Latest heart disease prediction activity</span>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Age</th>
+                        <th>Blood Pressure</th>
+                        <th>Cholesterol</th>
+                        <th>Prediction</th>
+                        <th>Probability</th>
+                        <th>Model</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in heart_records %}
+                    <tr>
+                        <td><span class="record-id">#{{ record.id }}</span></td>
+                        <td>{{ record.age }}</td>
+                        <td>{{ record.trestbps }}</td>
+                        <td>{{ record.chol }}</td>
+                        <td>
+                            {% if record.prediction == 1 %}
+                            <span class="status-badge status-positive">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                Positive
+                            </span>
+                            {% else %}
+                            <span class="status-badge status-negative">
+                                <i class="fa-solid fa-circle-check"></i>
+                                Negative
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ record.probability }}%</td>
+                        <td><span class="model-name">{{ record.model_used }}</span></td>
+                        <td>
+                            <span class="date-text">
+                                <i class="fa-regular fa-calendar"></i>
+                                {{ record.created_at|date:"d M Y H:i" }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fa-solid fa-folder-open"></i>
+                            </div>
+                            <h4>No heart disease predictions</h4>
+                            <p>There are currently no heart disease prediction records.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- ML DISEASE (AI SYMPTOM ANALYZER) HISTORY -->
+    <!-- ===================================================== -->
+    <div class="history-section">
+
+        <div class="table-header ml-header">
+            <div>
+                <h3>
+                    <i class="fa-solid fa-brain"></i>
+                    Multiple Symptom Predictions
+                </h3>
+                <span>Latest ML-based disease predictions from patient symptoms</span>
+            </div>
+            <span class="ml-tag">AI / ML</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patient</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Symptoms</th>
+                        <th>Predicted Disease</th>
+                        <th>Confidence</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in ml_records %}
+                    <tr>
+                        <td><span class="record-id">#{{ record.id }}</span></td>
+                        <td>{{ record.patient_name|default:"—" }}</td>
+                        <td>{{ record.age|default:"—" }}</td>
+                        <td>{{ record.gender|default:"—" }}</td>
+                        <td>
+                            <span class="ml-symptoms-cell" title="{{ record.symptoms }}">
+                                {{ record.symptoms }}
+                            </span>
+                        </td>
+                        <td><span class="ml-disease-name">{{ record.predicted_disease|title }}</span></td>
+                        <td>
+                            <div class="confidence-cell">
+                                <span>{{ record.confidence }}%</span>
+                                <div class="confidence-track">
+                                    <span class="confidence-fill" style="width: {{ record.confidence }}%;"></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="date-text">
+                                <i class="fa-regular fa-calendar"></i>
+                                {{ record.created_at|date:"d M Y H:i" }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fa-solid fa-folder-open"></i>
+                            </div>
+                            <h4>No Multiple symptom predictions</h4>
+                            <p>There are currently no ML disease prediction records.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

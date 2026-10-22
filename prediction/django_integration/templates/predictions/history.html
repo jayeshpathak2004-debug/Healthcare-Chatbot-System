@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Prediction History</h2>
+  <table class="table table-striped">
+    <thead>
+      <tr><th>Date</th><th>Disease</th><th>Result</th><th>Probability</th><th>Risk Segment</th><th>Model</th></tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td>{{ r.created_at }}</td>
+        <td>{{ r.get_disease_type_display }}</td>
+        <td>{{ r.prediction }}</td>
+        <td>{{ r.probability|floatformat:2 }}</td>
+        <td>{{ r.risk_segment }}</td>
+        <td>{{ r.model_used }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

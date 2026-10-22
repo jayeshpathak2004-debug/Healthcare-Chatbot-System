@@ -1,0 +1,802 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Chatbot</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+        :root {
+            --primary-color: #0077b6;
+            --secondary-color: #90e0ef;
+            --background-color: #e9f5f8;
+            --text-color: #1d3557;
+            --input-bg-color: #ffffff;
+            --input-border-color: #a8dadc;
+            --shadow-color: rgba(0, 0, 0, 0.15);
+            --button-hover-color: #005f8a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .chatbox {
+            width: 500px;
+            background-color: var(--input-bg-color);
+            border-radius: 12px;
+            box-shadow: 0 6px 10px var(--shadow-color);
+            padding: 25px;
+            text-align: center;
+            border: 1px solid var(--input-border-color);
+        }
+
+        .chatbox h3 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .chatbox textarea, .chatbox select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .chatbox button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            color: #ffffff;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .chatbox button:hover {
+            background-color: var(--button-hover-color);
+            transform: translateY(-2px);
+        }
+
+        #response {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 1rem;
+            background: var(--background-color);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px var(--shadow-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbox">
+        <h3>Healthcare Chatbot</h3>
+        <form method="POST" onsubmit="event.preventDefault(); sendMessage();">
+            {% csrf_token %}
+            <textarea id="userInput" placeholder="Describe your symptoms..."></textarea>
+            <select id="severity">
+                <option value="mild">Mild</option>
+                <option value="moderate">Moderate</option>
+                <option value="severe">Severe</option>
+            </select>
+            <select id="language">
+                <option value="en">English</option>
+                <option value="mr">Marathi</option>
+            </select>
+            <button type="button" onclick="sendMessage()">Send</button>
+        </form>
+        <div id="response"></div>
+        <button class="speaker-button" onclick="speakEnglish()">🔊 Speak in English</button>
+        <button class="speaker-button" onclick="speakMarathi()">🔊 Speak in Marathi</button>
+
+        </div>
+
+
+    <script>
+        function sendMessage() {
+    const symptoms = document.getElementById('userInput').value;
+    const severity = document.getElementById('severity').value;
+    const language = document.getElementById('language').value;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch('{% url "symptom_check" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken,
+        },
+        body: `symptoms=${symptoms}&severity=${severity}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        const responseDiv = document.getElementById('response');
+        let message = data.message || data.map(item => `
+            <p><strong>Diagnosis:</strong> ${item.diagnosis}</p>
+            <p><strong>Recommended Treatment:</strong> ${item.treatment}</p>
+        `).join('');
+        
+        responseDiv.innerHTML = `<p id="originalText">${message}</p><p id="translatedText" style="display: none;"></p>`;
+
+        if (language === 'mr') {
+            translateToMarathi(message);
+        }
+    })
+    .catch(err => console.error('Error:', err));
+}
+
+function translateToMarathi(text) {
+    let tempDiv = document.createElement("div");
+    tempDiv.innerHTML = text;
+    let plainText = tempDiv.textContent || tempDiv.innerText || "";
+
+    fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(plainText)}&langpair=en|mr`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.responseData.translatedText) {
+            const translatedText = data.responseData.translatedText;
+            console.log("Translated text:", translatedText);  
+            let translatedElement = document.getElementById('translatedText');
+            translatedElement.innerText = translatedText;
+            translatedElement.style.display = "block"; // Show translation
+            translatedElement.setAttribute('data-text', translatedText);
+        } else {
+            console.error('Translation failed');
+            alert('Translation failed!');
+        }
+    })
+    .catch(err => {
+        console.error('Translation Error:', err);
+        alert('Translation Error occurred!');
+    });
+}
+
+// Speak English function
+function speakEnglish() {
+    let textElement = document.getElementById('response');
+    if (!textElement) {
+        alert('No response to read.');
+        return;
+    }
+
+    let text = textElement.innerText.trim();
+    if (!text || text.length === 0) {
+        alert('Response is not available!');
+        return;
+    }
+
+    // Hide Marathi text when English is selected
+    document.getElementById('translatedText').style.display = "none";
+
+    // Call backend to generate English speech
+    fetch(`/chatbot/text-to-speech/?text=${encodeURIComponent(text)}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Speech generation failed: " + response.statusText);
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        let audioUrl = URL.createObjectURL(blob);
+        let audio = new Audio(audioUrl);
+        audio.play();
+    })
+    .catch(err => {
+        console.error('Error playing speech:', err);
+        alert('Error playing speech: ' + err.message);
+    });
+}
+
+// Speak Marathi function
+function speakMarathi() {
+    let textElement = document.getElementById('translatedText');
+
+    if (!textElement || textElement.innerText.trim().length === 0) {
+        alert('Translation not found! Please select Marathi and wait for translation.');
+        return;
+    }
+
+    let text = textElement.getAttribute('data-text') || textElement.innerText.trim();
+    if (!text || text.length === 0) {
+        alert('Translation is not available!');
+        return;
+    }
+
+    // Call backend to generate Marathi speech
+    fetch(`/chatbot/text-to-speech/?text=${encodeURIComponent(text)}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Speech generation failed: " + response.statusText);
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        let audioUrl = URL.createObjectURL(blob);
+        let audio = new Audio(audioUrl);
+        audio.play();
+    })
+    .catch(err => {
+        console.error('Error playing speech:', err);
+        alert('Error playing speech: ' + err.message);
+    });
+}
+
+    </script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aarogya Sahayak — Health Assistant</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+
+        :root {
+            /* ---- Palette: deep teal-ink + marigold, sage/mint ground ---- */
+            --ink:            #123832;
+            --ink-soft:       #3d5c56;
+            --ground:         #EEF5F1;
+            --paper:          #FFFFFF;
+            --line:           #cfe3da;
+
+            --teal:           #145C54;
+            --teal-deep:      #0d3f39;
+            --marigold:       #E8A33D;
+            --marigold-soft:  #FBE7C6;
+
+            --mild:           #4C9A7C;
+            --mild-bg:        #E1F3EA;
+            --moderate:       #E8A33D;
+            --moderate-bg:    #FBEDD4;
+            --severe:         #C1443B;
+            --severe-bg:      #F8E1DE;
+
+            --shadow: 0 12px 30px -12px rgba(18, 56, 50, 0.28);
+            --radius: 18px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+            background:
+                radial-gradient(1200px 600px at 15% -10%, #dcefe6 0%, transparent 60%),
+                var(--ground);
+            color: var(--ink);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 48px 20px;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 560px;
+        }
+
+        /* ---------- Header ---------- */
+        .masthead {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 22px;
+            padding: 0 6px;
+        }
+
+        .mark {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: var(--shadow);
+        }
+
+        .mark svg { width: 24px; height: 24px; }
+
+        .masthead h1 {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            font-size: 1.5rem;
+            line-height: 1.15;
+            color: var(--teal-deep);
+        }
+
+        .masthead .sub {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            margin-top: 2px;
+        }
+
+        /* ---------- Card ---------- */
+        .card {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 26px 26px 22px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--ink-soft);
+            margin-bottom: 8px;
+        }
+
+        textarea#userInput {
+            width: 100%;
+            min-height: 108px;
+            padding: 14px 16px;
+            border: 1.5px solid var(--line);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--ink);
+            background: var(--ground);
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea#userInput:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(20, 92, 84, 0.15);
+            background: var(--paper);
+        }
+
+        textarea#userInput::placeholder { color: #8aa39c; }
+
+        /* ---------- Severity segmented control ---------- */
+        .severity-row { margin-top: 18px; }
+
+        .segmented {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .segmented input { position: absolute; opacity: 0; pointer-events: none; }
+
+        .segmented label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 8px;
+            border-radius: 10px;
+            border: 1.5px solid var(--line);
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--ink-soft);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .segmented label .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: currentColor; opacity: 0.55;
+        }
+
+        .segmented input#sev-mild:checked ~ label[for="sev-mild"] {
+            background: var(--mild-bg); border-color: var(--mild); color: #2c6b4f;
+        }
+        .segmented input#sev-moderate:checked ~ label[for="sev-moderate"] {
+            background: var(--moderate-bg); border-color: var(--moderate); color: #93641c;
+        }
+        .segmented input#sev-severe:checked ~ label[for="sev-severe"] {
+            background: var(--severe-bg); border-color: var(--severe); color: #8f2e27;
+        }
+
+        /* ---------- Language pill toggle ---------- */
+        .lang-row {
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .pill-toggle {
+            display: inline-flex;
+            background: var(--ground);
+            border: 1.5px solid var(--line);
+            border-radius: 999px;
+            padding: 3px;
+            position: relative;
+        }
+
+        .pill-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+
+        .pill-toggle label {
+            position: relative;
+            z-index: 1;
+            padding: 7px 18px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 999px;
+            color: var(--ink-soft);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .pill-toggle input#lang-en:checked ~ label[for="lang-en"],
+        .pill-toggle input#lang-mr:checked ~ label[for="lang-mr"] {
+            color: #fff;
+        }
+
+        .pill-toggle .thumb {
+            position: absolute;
+            top: 3px; bottom: 3px; left: 3px;
+            width: calc(50% - 3px);
+            background: var(--teal);
+            border-radius: 999px;
+            transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+        }
+
+        .pill-toggle input#lang-mr:checked ~ .thumb {
+            transform: translateX(100%);
+        }
+
+        /* ---------- Vital-line divider (signature element) ---------- */
+        .vital-line {
+            margin: 20px 0 18px;
+            height: 22px;
+            width: 100%;
+        }
+
+        .vital-line svg { width: 100%; height: 100%; display: block; }
+
+        .vital-line path {
+            fill: none;
+            stroke: var(--line);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .vital-line.active path {
+            stroke: var(--marigold);
+            stroke-dasharray: 340;
+            stroke-dashoffset: 340;
+            animation: pulse-draw 1.4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-draw {
+            0%   { stroke-dashoffset: 340; opacity: 0.3; }
+            50%  { stroke-dashoffset: 0;   opacity: 1;   }
+            100% { stroke-dashoffset: -340; opacity: 0.3; }
+        }
+
+        /* ---------- Send button ---------- */
+        button.send {
+            width: 100%;
+            padding: 13px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            color: #fff;
+            background: var(--teal);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        button.send:hover { background: var(--teal-deep); }
+        button.send:active { transform: translateY(1px); }
+        button.send:focus-visible { outline: 3px solid var(--marigold); outline-offset: 2px; }
+
+        /* ---------- Response ---------- */
+        #response {
+            margin-top: 18px;
+        }
+
+        #response:empty { display: none; }
+
+        .response-card {
+            border-left: 4px solid var(--teal);
+            background: var(--ground);
+            border-radius: 0 12px 12px 0;
+            padding: 16px 18px;
+        }
+
+        .response-card p { font-size: 0.95rem; line-height: 1.55; }
+        .response-card p + p { margin-top: 8px; }
+        .response-card strong {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            color: var(--teal-deep);
+        }
+
+        #translatedText {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--line);
+        }
+
+        /* ---------- Speak controls ---------- */
+        .speak-row {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .speaker-button {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 10px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--teal-deep);
+            background: var(--marigold-soft);
+            border: 1.5px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .speaker-button:hover {
+            border-color: var(--marigold);
+            transform: translateY(-1px);
+        }
+
+        .speaker-button:focus-visible { outline: 3px solid var(--marigold); outline-offset: 2px; }
+
+        .footnote {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+            margin-top: 16px;
+            padding: 0 12px;
+        }
+
+        @media (max-width: 480px) {
+            .card { padding: 20px 18px; }
+            .segmented label { font-size: 0.8rem; padding: 9px 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header class="masthead">
+            <div class="mark">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 12h4l2-7 4 14 2-7h6" stroke="#EEF5F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div>
+                <h1>Aarogya Sahayak</h1>
+                <div class="sub">आरोग्य सहाय्यक — describe how you feel, in your own words</div>
+            </div>
+        </header>
+
+        <div class="card">
+            <form method="POST" onsubmit="event.preventDefault(); sendMessage();">
+                {% csrf_token %}
+
+                <label class="field-label" for="userInput">Symptoms</label>
+                <textarea id="userInput" placeholder="e.g. fever since two days, mild headache..."></textarea>
+
+                <div class="severity-row">
+                    <span class="field-label">Severity</span>
+                    <div class="segmented">
+                        <input type="radio" name="severity" id="sev-mild" value="mild" checked>
+                        <label for="sev-mild"><span class="dot"></span>Mild</label>
+
+                        <input type="radio" name="severity" id="sev-moderate" value="moderate">
+                        <label for="sev-moderate"><span class="dot"></span>Moderate</label>
+
+                        <input type="radio" name="severity" id="sev-severe" value="severe">
+                        <label for="sev-severe"><span class="dot"></span>Severe</label>
+                    </div>
+                </div>
+
+                <div class="lang-row">
+                    <span class="field-label" style="margin-bottom:0;">Reply in</span>
+                    <div class="pill-toggle">
+                        <input type="radio" name="language" id="lang-en" value="en" checked>
+                        <label for="lang-en">English</label>
+                        <input type="radio" name="language" id="lang-mr" value="mr">
+                        <label for="lang-mr">मराठी</label>
+                        <span class="thumb"></span>
+                    </div>
+                </div>
+
+                <div class="vital-line" id="vitalLine">
+                    <svg viewBox="0 0 400 22" preserveAspectRatio="none">
+                        <path d="M0 11 H150 L165 2 L180 20 L195 4 L210 11 H400"/>
+                    </svg>
+                </div>
+
+                <button type="button" class="send" onclick="sendMessage()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Check symptoms
+                </button>
+            </form>
+
+            <div id="response"></div>
+
+            <div class="speak-row">
+                <button class="speaker-button" onclick="speakEnglish()">🔊 Speak in English</button>
+                <button class="speaker-button" onclick="speakMarathi()">🔊 मराठीत बोला</button>
+            </div>
+        </div>
+
+        <p class="footnote">Aarogya Sahayak offers general guidance only and does not replace advice from a qualified doctor. In an emergency, contact local emergency services right away.</p>
+    </div>
+
+    <script>
+        function getSeverity() {
+            return document.querySelector('input[name="severity"]:checked').value;
+        }
+        function getLanguage() {
+            return document.querySelector('input[name="language"]:checked').value;
+        }
+
+        function setLoading(isLoading) {
+            document.getElementById('vitalLine').classList.toggle('active', isLoading);
+        }
+
+        function sendMessage() {
+            const symptoms = document.getElementById('userInput').value;
+            const severity = getSeverity();
+            const language = getLanguage();
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            setLoading(true);
+
+            fetch('{% url "symptom_check" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: `symptoms=${encodeURIComponent(symptoms)}&severity=${severity}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                setLoading(false);
+                const responseDiv = document.getElementById('response');
+                let message = data.message || data.map(item => `
+                    <p><strong>Diagnosis:</strong> ${item.diagnosis}</p>
+                    <p><strong>Recommended Treatment:</strong> ${item.treatment}</p>
+                `).join('');
+
+                responseDiv.innerHTML = `
+                    <div class="response-card">
+                        <p id="originalText">${message}</p>
+                        <p id="translatedText" style="display: none;"></p>
+                    </div>`;
+
+                if (language === 'mr') {
+                    translateToMarathi(message);
+                }
+            })
+            .catch(err => {
+                setLoading(false);
+                console.error('Error:', err);
+            });
+        }
+
+        function translateToMarathi(text) {
+            let tempDiv = document.createElement("div");
+            tempDiv.innerHTML = text;
+            let plainText = tempDiv.textContent || tempDiv.innerText || "";
+
+            fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(plainText)}&langpair=en|mr`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.responseData.translatedText) {
+                    const translatedText = data.responseData.translatedText;
+                    let translatedElement = document.getElementById('translatedText');
+                    translatedElement.innerText = translatedText;
+                    translatedElement.style.display = "block";
+                    translatedElement.setAttribute('data-text', translatedText);
+                } else {
+                    console.error('Translation failed');
+                    alert('Translation failed!');
+                }
+            })
+            .catch(err => {
+                console.error('Translation Error:', err);
+                alert('Translation Error occurred!');
+            });
+        }
+
+        function speakEnglish() {
+            let textElement = document.getElementById('response');
+            if (!textElement) { alert('No response to read.'); return; }
+
+            let text = textElement.innerText.trim();
+            if (!text || text.length === 0) { alert('Response is not available!'); return; }
+
+            const translated = document.getElementById('translatedText');
+            if (translated) translated.style.display = "none";
+
+            fetch(`/chatbot/text-to-speech/?text=${encodeURIComponent(text)}`)
+            .then(response => {
+                if (!response.ok) throw new Error("Speech generation failed: " + response.statusText);
+                return response.blob();
+            })
+            .then(blob => {
+                let audioUrl = URL.createObjectURL(blob);
+                new Audio(audioUrl).play();
+            })
+            .catch(err => {
+                console.error('Error playing speech:', err);
+                alert('Error playing speech: ' + err.message);
+            });
+        }
+
+        function speakMarathi() {
+            let textElement = document.getElementById('translatedText');
+            if (!textElement || textElement.innerText.trim().length === 0) {
+                alert('Translation not found! Please select Marathi and wait for translation.');
+                return;
+            }
+
+            let text = textElement.getAttribute('data-text') || textElement.innerText.trim();
+            if (!text || text.length === 0) { alert('Translation is not available!'); return; }
+
+            fetch(`/chatbot/text-to-speech/?text=${encodeURIComponent(text)}`)
+            .then(response => {
+                if (!response.ok) throw new Error("Speech generation failed: " + response.statusText);
+                return response.blob();
+            })
+            .then(blob => {
+                let audioUrl = URL.createObjectURL(blob);
+                new Audio(audioUrl).play();
+            })
+            .catch(err => {
+                console.error('Error playing speech:', err);
+                alert('Error playing speech: ' + err.message);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1264 @@
+
+{% extends "base.html" %}
+
+{% block extra_head %}
+
+<style>
+
+/* ==========================================
+   DIABETES PREDICTION PAGE
+========================================== */
+
+.rx-card {
+    max-width: 950px;
+    margin: 1.5rem auto;
+    padding: 1.6rem 1.8rem;
+
+    background: var(--card, #FFFFFF);
+    border: 1px solid var(--line, #DDE6E4);
+    border-radius: 18px;
+
+    box-shadow: 0 14px 32px rgba(27, 75, 90, .08);
+}
+
+
+/* ==========================================
+   PAGE HEADER
+========================================== */
+
+.rx-eyebrow {
+    max-width: 950px;
+    margin: 2.2rem auto .4rem;
+    padding: 0 1.5rem;
+
+    color: var(--coral, #F4A88B);
+
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    font-weight: 600;
+
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+
+.rx-title {
+    max-width: 950px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+
+    font-family: 'Space Grotesk', sans-serif;
+
+    font-size: 2.25rem;
+    line-height: 1.15;
+
+    color: var(--ink, #1E2D3D);
+
+    letter-spacing: -.03em;
+}
+
+
+.rx-sub {
+    max-width: 950px;
+    margin: .55rem auto 0;
+    padding: 0 1.5rem;
+
+    color: var(--slate, #6E8291);
+
+    font-size: .9rem;
+    line-height: 1.55;
+}
+
+
+/* ==========================================
+   PULSE
+========================================== */
+
+.rx-pulse {
+    display: block;
+
+    width: min(950px, calc(100% - 3rem));
+    height: 30px;
+
+    margin: 1rem auto;
+}
+
+
+.rx-pulse path {
+    fill: none;
+
+    stroke: var(--teal, #3C8DA3);
+
+    stroke-width: 2;
+}
+
+
+/* ==========================================
+   FIELDSET
+========================================== */
+
+.rx-card fieldset {
+
+    border: 1px solid var(--line, #DDE6E4);
+
+    border-radius: 13px;
+
+    padding: 1.1rem 1.2rem;
+
+    margin: 0 0 1rem;
+}
+
+
+.rx-card legend {
+
+    padding: 0 .55rem;
+
+    font-family: 'Space Grotesk', sans-serif;
+
+    font-size: .9rem;
+
+    font-weight: 700;
+
+    color: var(--teal, #3C8DA3);
+}
+
+
+/* ==========================================
+   TWO COLUMN GRID
+========================================== */
+
+.rx-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    column-gap: 1.25rem;
+
+    row-gap: .85rem;
+}
+
+
+/* ==========================================
+   FORM FIELD
+========================================== */
+
+.rx-field {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: .28rem;
+
+    min-width: 0;
+}
+
+
+/* ==========================================
+   LABEL
+========================================== */
+
+.rx-field label {
+
+    margin: 0;
+
+    font-size: .82rem;
+
+    line-height: 1.25;
+
+    font-weight: 600;
+
+    color: #1E2D3D;
+}
+
+
+.rx-field .unit {
+
+    color: #71818C;
+
+    font-weight: 400;
+}
+
+
+/* ==========================================
+   INPUT / SELECT
+========================================== */
+
+.rx-field input,
+.rx-field select {
+
+    width: 100%;
+
+    height: 38px;
+
+    box-sizing: border-box;
+
+    padding: .45rem .75rem;
+
+    border: 1px solid var(--line, #DDE6E4);
+
+    border-radius: 8px;
+
+    background: #F5F8F7;
+
+    color: #1E2D3D;
+
+    font-family: 'Inter', sans-serif;
+
+    font-size: .84rem;
+
+    outline: none;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+}
+
+
+.rx-field input:focus,
+.rx-field select:focus {
+
+    border-color:
+        var(--teal, #3C8DA3);
+
+    background: #FFFFFF;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(60, 141, 163, .12);
+}
+
+
+.rx-field input::placeholder {
+
+    color: #9AA7AE;
+}
+
+
+/* ==========================================
+   DISABLED PREGNANCY FIELD
+========================================== */
+
+.rx-field input:disabled {
+
+    background: #E9EFED;
+
+    color: #87959D;
+
+    cursor: not-allowed;
+}
+
+
+/* ==========================================
+   FIELD HINT
+========================================== */
+
+.rx-field .hint {
+
+    margin: 0;
+
+    color: #7A8992;
+
+    font-size: .67rem;
+
+    line-height: 1.2;
+}
+
+
+/* ==========================================
+   ACTION BAR
+========================================== */
+
+.action-bar {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    gap: .6rem;
+
+    margin-top: 1rem;
+}
+
+
+.btn,
+.rx-submit {
+
+    height: 38px;
+
+    padding: 0 1rem;
+
+    border-radius: 8px;
+
+    font-family: 'Inter', sans-serif;
+
+    font-size: .82rem;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all .2s ease;
+}
+
+
+.btn {
+
+    border: 1px solid transparent;
+}
+
+
+/* ==========================================
+   BACK BUTTON
+========================================== */
+
+.btn-outline {
+
+    background: transparent;
+
+    border-color:
+        var(--teal, #3C8DA3);
+
+    color:
+        var(--teal, #3C8DA3);
+}
+
+
+.btn-outline:hover {
+
+    background:
+        var(--teal, #3C8DA3);
+
+    color: #FFFFFF;
+}
+
+
+/* ==========================================
+   CLEAR BUTTON
+========================================== */
+
+.btn-neutral {
+
+    background: #EEF3F2;
+
+    color: #1E2D3D;
+}
+
+
+.btn-neutral:hover {
+
+    background: #E3EBE9;
+}
+
+
+/* ==========================================
+   PREDICT BUTTON
+========================================== */
+
+.rx-submit {
+
+    border: none;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--teal, #3C8DA3),
+            var(--teal-deep, #1B4B5A)
+        );
+
+    color: #FFFFFF;
+
+    box-shadow:
+        0 10px 20px -12px
+        rgba(60, 141, 163, .55);
+}
+
+
+.rx-submit:hover {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--coral, #F4A88B),
+            var(--teal, #3C8DA3)
+        );
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 14px 26px -12px
+        rgba(60, 141, 163, .55);
+}
+
+
+/* ==========================================
+   RESULT CARD
+========================================== */
+
+.rx-result {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: .8rem;
+
+    margin-top: 1rem;
+
+    padding: 1rem 1.2rem;
+
+    border-radius: 11px;
+
+    border: 1px solid var(--line, #DDE6E4);
+}
+
+
+/* ==========================================
+   LOWER RISK
+========================================== */
+
+.rx-result.is-clear {
+
+    background:
+        rgba(111, 184, 138, .10);
+
+    border-color:
+        rgba(111, 184, 138, .30);
+}
+
+
+/* ==========================================
+   HIGHER RISK
+========================================== */
+
+.rx-result.is-detected {
+
+    background:
+        rgba(244, 168, 139, .10);
+
+    border-color:
+        rgba(244, 168, 139, .30);
+}
+
+
+/* ==========================================
+   RESULT DOT
+========================================== */
+
+.rx-dot {
+
+    width: 9px;
+
+    height: 9px;
+
+    min-width: 9px;
+
+    margin-top: .35rem;
+
+    border-radius: 50%;
+
+    background:
+        var(--sage, #4F9D6E);
+}
+
+
+.is-detected .rx-dot {
+
+    background:
+        var(--coral, #F4A88B);
+}
+
+
+/* ==========================================
+   RESULT TEXT
+========================================== */
+
+.rx-result h3 {
+
+    margin: 0 0 .25rem;
+
+    font-family:
+        'Space Grotesk', sans-serif;
+
+    font-size: 1rem;
+
+    color: #1E2D3D;
+}
+
+
+.rx-result p {
+
+    margin: 0;
+
+    color: #5B6D7A;
+
+    font-size: .82rem;
+
+    line-height: 1.45;
+}
+
+
+/* ==========================================
+   DISCLAIMER
+========================================== */
+
+.rx-disclaimer {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: .55rem;
+
+    margin-top: .8rem;
+
+    padding: .75rem .9rem;
+
+    border-radius: 9px;
+
+    background: #F5F8F7;
+
+    border: 1px solid var(--line, #DDE6E4);
+
+    color: #6E8291;
+
+    font-size: .7rem;
+
+    line-height: 1.4;
+}
+
+
+.rx-disclaimer i {
+
+    margin-top: .1rem;
+
+    color:
+        var(--teal, #3C8DA3);
+}
+
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 700px) {
+
+    .rx-eyebrow,
+    .rx-title,
+    .rx-sub {
+
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+
+    .rx-title {
+
+        font-size: 1.9rem;
+    }
+
+
+    .rx-pulse {
+
+        width:
+            calc(100% - 2rem);
+    }
+
+
+    .rx-card {
+
+        margin: 1rem;
+
+        padding: .9rem;
+    }
+
+
+    .rx-card fieldset {
+
+        padding: .85rem;
+
+        margin-bottom: .75rem;
+    }
+
+
+    .rx-grid {
+
+        grid-template-columns: 1fr;
+
+        row-gap: .75rem;
+    }
+
+
+    .action-bar {
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+
+    .action-bar button {
+
+        width: 100%;
+    }
+
+
+    .rx-result {
+
+        padding: .9rem;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- ==========================================
+     PAGE HEADER
+========================================== -->
+
+<p class="rx-eyebrow">
+    Metabolic health assessment
+</p>
+
+
+<h1 class="rx-title">
+    Diabetes prediction
+</h1>
+
+
+<p class="rx-sub">
+    Enter the patient's health information below.
+    The model estimates the likelihood of diabetes
+    based on these clinical indicators.
+</p>
+
+
+<!-- ==========================================
+     PULSE LINE
+========================================== -->
+
+<svg
+    class="rx-pulse"
+    viewBox="0 0 700 36"
+    preserveAspectRatio="none"
+    aria-hidden="true"
+>
+
+    <path
+        d="M0,18
+           L220,18
+           L245,4
+           L268,32
+           L292,10
+           L312,18
+           L700,18"
+    />
+
+</svg>
+
+
+<!-- ==========================================
+     MAIN FORM CARD
+========================================== -->
+
+<div class="rx-card">
+
+
+    <form method="POST" novalidate>
+
+        {% csrf_token %}
+
+
+        <!-- ==================================
+             PATIENT PROFILE
+        =================================== -->
+
+        <fieldset>
+
+            <legend>
+                Patient profile
+            </legend>
+
+
+            <div class="rx-grid">
+
+
+                <!-- Gender -->
+
+                <div class="rx-field">
+
+                    <label for="gender">
+                        Gender
+                    </label>
+
+
+                    <select
+                        id="gender"
+                        name="gender"
+                        required
+                    >
+
+                        <option
+                            value=""
+                            selected
+                            disabled
+                        >
+                            Select gender
+                        </option>
+
+                        <option value="Female">
+                            Female
+                        </option>
+
+                        <option value="Male">
+                            Male
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- Age -->
+
+                <div class="rx-field">
+
+                    <label for="Age">
+                        Age
+                        <span class="unit">
+                            (years)
+                        </span>
+                    </label>
+
+
+                    <input
+                        id="Age"
+                        name="Age"
+                        type="number"
+                        min="1"
+                        max="120"
+                        step="1"
+                        placeholder="34"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- Pregnancies -->
+
+                <div
+                    class="rx-field"
+                    id="pregnanciesGroup"
+                >
+
+                    <label for="Pregnancies">
+                        Pregnancies
+                    </label>
+
+
+                    <input
+                        id="Pregnancies"
+                        name="Pregnancies"
+                        type="number"
+                        min="0"
+                        step="1"
+                        placeholder="2"
+                    >
+
+
+                    <span
+                        class="hint"
+                        id="pregnanciesHint"
+                    >
+                        Number of times pregnant
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </fieldset>
+
+
+        <!-- ==================================
+             CLINICAL MEASUREMENTS
+        =================================== -->
+
+        <fieldset>
+
+            <legend>
+                Clinical measurements
+            </legend>
+
+
+            <div class="rx-grid">
+
+
+                <!-- Glucose -->
+
+                <div class="rx-field">
+
+                    <label for="Glucose">
+
+                        Glucose
+
+                        <span class="unit">
+                            (mg/dL)
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        id="Glucose"
+                        name="Glucose"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        placeholder="120"
+                        required
+                    >
+
+
+                    <span class="hint">
+                        Blood glucose concentration
+                    </span>
+
+                </div>
+
+
+                <!-- Blood Pressure -->
+
+                <div class="rx-field">
+
+                    <label for="BloodPressure">
+
+                        Blood pressure
+
+                        <span class="unit">
+                            (mmHg)
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        id="BloodPressure"
+                        name="BloodPressure"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        placeholder="72"
+                        required
+                    >
+
+
+                    <span class="hint">
+                        Resting blood pressure
+                    </span>
+
+                </div>
+
+
+                <!-- Skin Thickness -->
+
+                <div class="rx-field">
+
+                    <label for="SkinThickness">
+
+                        Skin thickness
+
+                        <span class="unit">
+                            (mm)
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        id="SkinThickness"
+                        name="SkinThickness"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        placeholder="23"
+                        required
+                    >
+
+
+                    <span class="hint">
+                        Triceps skin fold thickness
+                    </span>
+
+                </div>
+
+
+                <!-- Insulin -->
+
+                <div class="rx-field">
+
+                    <label for="Insulin">
+
+                        Insulin
+
+                        <span class="unit">
+                            (µU/mL)
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        id="Insulin"
+                        name="Insulin"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        placeholder="80"
+                        required
+                    >
+
+
+                    <span class="hint">
+                        Serum insulin level
+                    </span>
+
+                </div>
+
+
+                <!-- BMI -->
+
+                <div class="rx-field">
+
+                    <label for="BMI">
+
+                        BMI
+
+                        <span class="unit">
+                            (kg/m²)
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        id="BMI"
+                        name="BMI"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        placeholder="26.4"
+                        required
+                    >
+
+
+                    <span class="hint">
+                        Body mass index
+                    </span>
+
+                </div>
+
+
+                <!-- Diabetes Pedigree -->
+
+                <div class="rx-field">
+
+                    <label for="DiabetesPedigreeFunction">
+
+                        Diabetes pedigree function
+
+                    </label>
+
+
+                    <input
+                        id="DiabetesPedigreeFunction"
+                        name="DiabetesPedigreeFunction"
+                        type="number"
+                        min="0"
+                        step="0.001"
+                        placeholder="0.372"
+                        required
+                    >
+
+
+                    <span class="hint">
+                        Family-history based diabetes score
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </fieldset>
+
+
+        <!-- ==================================
+             ACTION BUTTONS
+        =================================== -->
+
+        <div class="action-bar">
+
+
+            <button
+                type="button"
+                class="btn btn-outline"
+                onclick="window.history.back()"
+            >
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Back
+
+            </button>
+
+
+            <button
+                type="button"
+                id="clearButton"
+                class="btn btn-neutral"
+            >
+
+                <i class="fa-solid fa-rotate-left"></i>
+
+                Clear
+
+            </button>
+
+
+            <button
+                class="rx-submit"
+                type="submit"
+            >
+
+                <i class="fa-solid fa-stethoscope"></i>
+
+                Predict diabetes risk
+
+            </button>
+
+
+        </div>
+
+
+    </form>
+
+
+    <!-- ======================================
+         PREDICTION RESULT
+    ======================================= -->
+
+    {% if result %}
+
+
+        {% if result == "Not Diabetic" %}
+
+
+            <div class="rx-result is-clear">
+
+                <span class="rx-dot"></span>
+
+
+                <div>
+
+                    <h3>
+                        Lower diabetes risk
+                    </h3>
+
+
+                    <p>
+                        Prediction result:
+                        <strong>{{ result }}</strong>.
+                        The model estimates a lower likelihood
+                        of diabetes based on the values entered.
+                        Continue maintaining a healthy lifestyle.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        {% else %}
+
+
+            <div class="rx-result is-detected">
+
+                <span class="rx-dot"></span>
+
+
+                <div>
+
+                    <h3>
+                        Higher diabetes risk
+                    </h3>
+
+
+                    <p>
+                        Prediction result:
+                        <strong>{{ result }}</strong>.
+                        The model estimates a higher likelihood
+                        of diabetes based on the values entered.
+                        Please consult a qualified healthcare
+                        professional for further evaluation.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        {% endif %}
+
+
+        <!-- ==================================
+             DISCLAIMER
+        =================================== -->
+
+        <div class="rx-disclaimer">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+
+            <span>
+
+                This prediction is for informational purposes
+                only and should not be considered a medical
+                diagnosis. Please consult a qualified healthcare
+                professional for medical advice.
+
+            </span>
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+<!-- ==========================================
+     PREGNANCY FIELD CONTROL
+========================================== -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const gender =
+            document.getElementById("gender");
+
+        const pregnanciesInput =
+            document.getElementById("Pregnancies");
+
+        const pregnanciesGroup =
+            document.getElementById(
+                "pregnanciesGroup"
+            );
+
+        const pregnanciesHint =
+            document.getElementById(
+                "pregnanciesHint"
+            );
+
+
+        function updatePregnancyField() {
+
+            if (gender.value === "Male") {
+
+                pregnanciesInput.value = 0;
+
+                pregnanciesInput.disabled = true;
+
+                pregnanciesInput.required = false;
+
+                pregnanciesGroup.style.opacity =
+                    "0.6";
+
+                pregnanciesHint.textContent =
+                    "Not applicable for male patients.";
+
+            }
+
+            else {
+
+                pregnanciesInput.disabled = false;
+
+                pregnanciesInput.required = false;
+
+                pregnanciesGroup.style.opacity =
+                    "1";
+
+                pregnanciesHint.textContent =
+                    "Number of times pregnant.";
+
+            }
+
+        }
+
+
+        gender.addEventListener(
+            "change",
+            updatePregnancyField
+        );
+
+
+        updatePregnancyField();
+
+    }
+
+);
+// clear script
+document.addEventListener("DOMContentLoaded", function () {
+
+    const clearButton = document.getElementById("clearButton");
+    const form = document.querySelector(".rx-card form");
+
+    if (clearButton && form) {
+
+        clearButton.addEventListener("click", function () {
+
+            // Clear all input fields
+            form.querySelectorAll("input").forEach(function (input) {
+
+                if (
+                    input.type !== "submit" &&
+                    input.type !== "button" &&
+                    input.type !== "hidden"
+                ) {
+                    input.value = "";
+                }
+
+            });
+
+            // Reset all select fields
+            form.querySelectorAll("select").forEach(function (select) {
+                select.selectedIndex = 0;
+            });
+
+        });
+
+    }
+
+});
+</script>
+
+
+
+{% endblock %}

@@ -1,0 +1,1217 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+
+<style>
+
+/* =====================================================
+   PAGE WRAPPER
+===================================================== */
+
+.hd-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+}
+
+/* =====================================================
+   DASHBOARD BASE
+===================================================== */
+
+.hd-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.hd-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+
+.hd-eyebrow::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 0 4px rgba(95, 214, 200, .18);
+}
+
+.hd-title {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.hd-sub {
+    margin: 8px 0 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+}
+
+.hd-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border-radius: 20px;
+    background: rgba(111, 214, 160, .14);
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.hd-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    display: inline-block;
+}
+
+
+/* =====================================================
+   STATISTICS
+===================================================== */
+
+.hd-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+/* Modifier for rows with only 2 cards (Positive/Negative) —
+   keeps cards the same width as the 4-col grid above them
+   instead of stretching to fill empty columns */
+.hd-stats--split {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.hd-stats--split .hd-card {
+    grid-column: span 2;
+}
+
+.hd-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+}
+
+.hd-card--diabetes { border-left: 5px solid #f59e0b; }
+.hd-card--heart { border-left: 5px solid #dc2626; }
+.hd-card--positive { border-left: 5px solid #b91c1c; }
+.hd-card--negative { border-left: 5px solid #15803d; }
+
+.hd-label {
+    margin: 0 0 12px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.hd-value-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.hd-value {
+    margin: 0;
+    color: #0f172a;
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.hd-trend {
+    font-size: 12px;
+    font-weight: 700;
+    color: #15803d;
+}
+
+.hd-trend--rate { color: #475569; }
+
+.hd-mini-bar {
+    height: 6px;
+    margin-top: 15px;
+    background: #e2e8f0;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.hd-mini-bar-fill {
+    height: 100%;
+    background: #334155;
+    border-radius: 20px;
+}
+
+
+/* =====================================================
+   SECTIONS
+===================================================== */
+
+.hd-section {
+    margin-top: 35px;
+}
+
+.hd-section-title {
+    margin: 0 0 18px;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+
+/* =====================================================
+   CHARTS
+===================================================== */
+
+.hd-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    align-items: stretch;
+}
+
+.hd-chart-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.hd-chart-head h4 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 17px;
+}
+
+.hd-chart-head p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.hd-chart-canvas-wrap {
+    position: relative;
+    height: 280px;
+    margin-top: 20px;
+}
+
+.hd-chart-canvas-wrap canvas {
+    max-height: 280px;
+}
+
+.hd-chart-center-label {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+}
+
+.hd-chart-center-label .n {
+    display: block;
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.hd-chart-center-label .l {
+    display: block;
+    margin-top: 3px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.hd-legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.hd-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #475569;
+    font-size: 13px;
+}
+
+.hd-legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+
+/* =====================================================
+   SUMMARY
+===================================================== */
+
+.hd-summary {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.hd-summary-item {
+    padding: 8px 13px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.hd-summary-positive { background: #fef2f2; color: #b91c1c; }
+.hd-summary-negative { background: #f0fdf4; color: #15803d; }
+
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.hd-table-card {
+    width: 100%;
+    overflow-x: auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+}
+
+.hd-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.hd-table th {
+    padding: 15px 16px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 12px;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.hd-table td {
+    padding: 15px 16px;
+    color: #334155;
+    font-size: 13px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.hd-table tbody tr:hover { background: #f8fafc; }
+.hd-table tbody tr:last-child td { border-bottom: none; }
+
+
+/* =====================================================
+   RESULT PILLS
+===================================================== */
+
+.hd-pill {
+    display: inline-block;
+    padding: 6px 11px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.hd-pill--positive { background: #fef2f2; color: #b91c1c; }
+.hd-pill--negative { background: #f0fdf4; color: #15803d; }
+
+.hd-disease { font-weight: 700; color: #0f172a; }
+
+
+/* =====================================================
+   PROBABILITY
+===================================================== */
+
+.hd-prob-cell { min-width: 130px; }
+.hd-prob-cell > span { font-weight: 700; color: #334155; }
+
+.hd-prob-track {
+    width: 100%;
+    height: 5px;
+    margin-top: 7px;
+    background: #e2e8f0;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.hd-prob-fill { height: 100%; border-radius: 20px; }
+
+
+/* =====================================================
+   ML DISEASE PREDICTION
+===================================================== */
+
+.hd-card--ml { border-left: 5px solid #2563eb; }
+
+.ml-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.ml-title {
+    margin: 0;
+    color: var(--ink);
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.ml-subtitle {
+    margin: 6px 0 0;
+    color: var(--ink-soft);
+    font-size: 13px;
+}
+
+.ml-badge {
+    padding: 8px 13px;
+    border-radius: 20px;
+    background: rgba(95, 214, 200, .16);
+    color: #1c8f7f;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.ml-result { font-weight: 800; color: #2563eb; }
+.ml-confidence { font-weight: 800; color: #334155; }
+
+.ml-symptoms {
+    max-width: 350px;
+    line-height: 1.5;
+    color: #64748b;
+}
+
+.ml-model {
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #475569;
+    font-family: monospace;
+    font-size: 11px;
+}
+
+.ml-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.ml-stat {
+    padding: 18px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+}
+
+.ml-stat-label { margin: 0 0 7px; color: #64748b; font-size: 12px; font-weight: 700; }
+.ml-stat-value { margin: 0; color: #0f172a; font-size: 24px; font-weight: 800; }
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.hd-empty {
+    text-align: center !important;
+    padding: 30px !important;
+    color: #94a3b8 !important;
+}
+
+
+/* =====================================================
+   RESPONSIVE — DESKTOP DOWN TO MOBILE
+===================================================== */
+
+/* Ultra-wide monitors: give the layout more breathing room
+   instead of stretching cards edge to edge */
+@media (min-width: 1600px) {
+    .hd-page { max-width: 1560px; }
+    .hd-stats { gap: 22px; }
+}
+
+/* 13"–14" laptops: 4 stat cards get tight, ease to 3 + wrap
+   before the harder breakpoint at 1000px */
+@media (max-width: 1300px) {
+    .hd-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .hd-stats--split .hd-card {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 1000px) {
+    .hd-page { padding: 34px 20px 64px; }
+
+    .hd-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hd-stats--split .hd-card {
+        grid-column: span 1;
+    }
+
+    .hd-chart-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .hd-page { padding: 28px 16px 56px; }
+
+    .hd-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .hd-title { font-size: 28px; }
+
+    .hd-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .ml-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hd-section {
+        margin-top: 28px;
+    }
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="hd-page">
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
+
+<div class="hd-header">
+
+    <div>
+        <p class="hd-eyebrow">Prediction Monitoring</p>
+
+        <h2 class="hd-title">
+            Healthcare Dashboard
+        </h2>
+
+        <p class="hd-sub">
+            Diabetes, heart disease and ML disease prediction monitoring system.
+        </p>
+    </div>
+
+    <span class="hd-live">
+        <span class="hd-dot"></span>
+        Live Data
+    </span>
+
+</div>
+
+
+<!-- =====================================================
+     OVERALL SYSTEM STATISTICS
+====================================================== -->
+
+<div class="hd-stats">
+
+    <div class="hd-card">
+        <p class="hd-label">Total Predictions</p>
+        <div class="hd-value-row">
+            <p class="hd-value">{{ total_predictions|default:0 }}</p>
+            <span class="hd-trend hd-trend--rate">ALL TIME</span>
+        </div>
+    </div>
+
+    <div class="hd-card hd-card--diabetes">
+        <p class="hd-label">Diabetes Predictions</p>
+        <div class="hd-value-row">
+            <p class="hd-value">{{ diabetes_count|default:0 }}</p>
+            <span class="hd-trend">{{ diabetes_share|default:0 }}%</span>
+        </div>
+        <div class="hd-mini-bar">
+            <div class="hd-mini-bar-fill" style="width: {{ diabetes_share|default:0 }}%;"></div>
+        </div>
+    </div>
+
+    <div class="hd-card hd-card--heart">
+        <p class="hd-label">Heart Disease Predictions</p>
+        <div class="hd-value-row">
+            <p class="hd-value">{{ heart_count|default:0 }}</p>
+            <span class="hd-trend">{{ heart_share|default:0 }}%</span>
+        </div>
+        <div class="hd-mini-bar">
+            <div class="hd-mini-bar-fill" style="width: {{ heart_share|default:0 }}%;"></div>
+        </div>
+    </div>
+
+    <div class="hd-card hd-card--ml">
+        <p class="hd-label">ML Disease Predictions</p>
+        <div class="hd-value-row">
+            <p class="hd-value">{{ ml_count|default:0 }}</p>
+            <span class="hd-trend">{{ ml_share|default:0 }}%</span>
+        </div>
+        <div class="hd-mini-bar">
+            <div class="hd-mini-bar-fill" style="width: {{ ml_share|default:0 }}%;"></div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     POSITIVE / NEGATIVE
+====================================================== -->
+
+<div class="hd-stats hd-stats--split">
+
+    <div class="hd-card hd-card--positive">
+        <p class="hd-label">Positive Cases</p>
+        <div class="hd-value-row">
+            <p class="hd-value">{{ positive_count|default:0 }}</p>
+            <span class="hd-trend">{{ positive_rate|default:0 }}%</span>
+        </div>
+        <div class="hd-mini-bar">
+            <div class="hd-mini-bar-fill" style="width: {{ positive_rate|default:0 }}%;"></div>
+        </div>
+    </div>
+
+    <div class="hd-card hd-card--negative">
+        <p class="hd-label">Negative Cases</p>
+        <div class="hd-value-row">
+            <p class="hd-value">{{ negative_count|default:0 }}</p>
+            <span class="hd-trend">{{ negative_rate|default:0 }}%</span>
+        </div>
+        <div class="hd-mini-bar">
+            <div class="hd-mini-bar-fill" style="width: {{ negative_rate|default:0 }}%;"></div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ANALYTICS
+====================================================== -->
+
+<div class="hd-section">
+
+    <h3 class="hd-section-title">Analytics Overview</h3>
+
+    <div class="hd-chart-grid">
+
+        <div class="hd-chart-card">
+            <div class="hd-chart-head">
+                <div>
+                    <h4>Outcome Distribution</h4>
+                    <p>Positive vs negative across predictions</p>
+                </div>
+            </div>
+
+            <div class="hd-chart-canvas-wrap">
+                <canvas id="hdOutcomeChart"></canvas>
+                <div class="hd-chart-center-label">
+                    <span class="n">{{ total_predictions|default:0 }}</span>
+                    <span class="l">Total</span>
+                </div>
+            </div>
+
+            <div class="hd-legend">
+                <span class="hd-legend-item">
+                    <span class="hd-legend-dot" style="background:#b91c1c;"></span>
+                    Positive
+                </span>
+                <span class="hd-legend-item">
+                    <span class="hd-legend-dot" style="background:#15803d;"></span>
+                    Negative
+                </span>
+            </div>
+        </div>
+
+        <div class="hd-chart-card">
+            <div class="hd-chart-head">
+                <div>
+                    <h4>Disease Comparison</h4>
+                    <p>Prediction count by condition</p>
+                </div>
+            </div>
+
+            <div class="hd-chart-canvas-wrap">
+                <canvas id="hdDiseaseChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     DIABETES
+====================================================== -->
+
+<div class="hd-section">
+
+    <h3 class="hd-section-title">Diabetes Predictions</h3>
+
+<div class="hd-summary">
+    <span class="hd-summary-item hd-summary-positive">
+        Positive: {{ diabetes_positive|default:0 }}
+    </span>
+
+    <span class="hd-summary-item hd-summary-negative">
+        Negative: {{ diabetes_negative|default:0 }}
+    </span>
+</div>
+
+<div class="hd-table-card">
+    <table class="hd-table">
+
+        <thead>
+            <tr>
+                <th>Age</th>
+                <th>Glucose</th>
+                <th>BMI</th>
+                <th>Result</th>
+                <th>Probability</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for record in recent_diabetes %}
+
+            <tr>
+
+                <td>{{ record.age }}</td>
+
+                <td>{{ record.glucose }}</td>
+
+                <td>{{ record.bmi }}</td>
+
+                <td>
+                    {% if record.prediction == 1 %}
+                        <span class="hd-pill hd-pill--positive">
+                            Positive
+                        </span>
+                    {% else %}
+                        <span class="hd-pill hd-pill--negative">
+                            Negative
+                        </span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <div class="hd-prob-cell">
+
+                        <span>
+                            {{ record.probability }}%
+                        </span>
+
+                        <div class="hd-prob-track">
+
+                            <div
+                                class="hd-prob-fill"
+                                style="
+                                    width: {{ record.probability }}%;
+                                    background:
+                                    {% if record.prediction == 1 %}
+                                        #b91c1c
+                                    {% else %}
+                                        #15803d
+                                    {% endif %};
+                                ">
+                            </div>
+
+                        </div>
+
+                    </div>
+                </td>
+
+                <td>
+                    {{ record.created_at|date:"d M Y H:i" }}
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="6" class="hd-empty">
+                    No diabetes predictions found.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     HEART DISEASE
+====================================================== -->
+
+<div class="hd-section">
+
+    <h3 class="hd-section-title">Heart Disease Predictions</h3>
+
+<div class="hd-summary">
+
+    <span class="hd-summary-item hd-summary-positive">
+        Positive: {{ heart_positive|default:0 }}
+    </span>
+
+    <span class="hd-summary-item hd-summary-negative">
+        Negative: {{ heart_negative|default:0 }}
+    </span>
+
+</div>
+
+<div class="hd-table-card">
+
+    <table class="hd-table">
+
+        <thead>
+
+            <tr>
+                <th>Age</th>
+                <th>Blood Pressure</th>
+                <th>Cholesterol</th>
+                <th>Result</th>
+                <th>Probability</th>
+                <th>Date</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for record in recent_heart %}
+
+            <tr>
+
+                <td>
+                    {{ record.age }}
+                </td>
+
+                <td>
+                    {{ record.trestbps }}
+                </td>
+
+                <td>
+                    {{ record.chol }}
+                </td>
+
+                <td>
+
+                    {% if record.prediction == 1 %}
+
+                        <span class="hd-pill hd-pill--positive">
+                            Positive
+                        </span>
+
+                    {% else %}
+
+                        <span class="hd-pill hd-pill--negative">
+                            Negative
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    <div class="hd-prob-cell">
+
+                        <span>
+                            {{ record.probability }}%
+                        </span>
+
+                        <div class="hd-prob-track">
+
+                            <div
+                                class="hd-prob-fill"
+                                style="
+                                    width: {{ record.probability }}%;
+                                    background:
+                                    {% if record.prediction == 1 %}
+                                        #b91c1c
+                                    {% else %}
+                                        #15803d
+                                    {% endif %};
+                                ">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </td>
+
+                <td>
+                    {{ record.created_at|date:"d M Y H:i" }}
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="6" class="hd-empty">
+                    No heart disease predictions found.
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- =====================================================
+     ML DISEASE PREDICTIONS
+====================================================== -->
+
+<div class="hd-section">
+
+    <div class="ml-header">
+        <div>
+            <h3 class="ml-title">ML Disease Predictions</h3>
+            <p class="ml-subtitle">TF-IDF + Logistic Regression disease prediction results.</p>
+        </div>
+        <span class="ml-badge">AI / ML MODEL</span>
+    </div>
+
+    <div class="ml-stat-grid">
+        <div class="ml-stat">
+            <p class="ml-stat-label">Total ML Predictions</p>
+            <p class="ml-stat-value">{{ ml_count|default:0 }}</p>
+        </div>
+        <div class="ml-stat">
+            <p class="ml-stat-label">Latest Disease</p>
+            <p class="ml-stat-value ml-result">
+                {% if latest_ml_prediction %}{{ latest_ml_prediction.predicted_disease|title }}{% else %}—{% endif %}
+            </p>
+        </div>
+        <div class="ml-stat">
+            <p class="ml-stat-label">Latest Confidence</p>
+            <p class="ml-stat-value">
+                {% if latest_ml_prediction %}{{ latest_ml_prediction.confidence }}%{% else %}—{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="hd-table-card">
+        <table class="hd-table">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Symptoms</th>
+                    <th>Predicted Disease</th>
+                    <th>Confidence</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in recent_ml_predictions %}
+                <tr>
+                    <td><strong>{{ record.patient_name }}</strong></td>
+                    <td>{% if record.age %}{{ record.age }}{% else %}—{% endif %}</td>
+                    <td>{% if record.gender %}{{ record.gender }}{% else %}—{% endif %}</td>
+                    <td><div class="ml-symptoms">{{ record.symptoms }}</div></td>
+                    <td><span class="ml-result">{{ record.predicted_disease|title }}</span></td>
+                    <td>
+                        <div class="hd-prob-cell">
+                            <span class="ml-confidence">{{ record.confidence }}%</span>
+                            <div class="hd-prob-track">
+                                <div class="hd-prob-fill" style="width: {{ record.confidence }}%; background:#2563eb;"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ record.created_at|date:"d M Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="hd-empty">No ML disease predictions found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ALL PREDICTIONS
+====================================================== -->
+
+<div class="hd-section">
+
+    <h3 class="hd-section-title">Recent Diabetes Predictions</h3>
+
+<div class="hd-table-card">
+
+    <table class="hd-table">
+
+        <thead>
+            <tr>
+                <th>Disease</th>
+                <th>Age</th>
+                <th>Glucose</th>
+                <th>BMI</th>
+                <th>Result</th>
+                <th>Probability</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for record in recent_diabetes %}
+
+            <tr>
+
+                <td>
+                    <span class="hd-disease">
+                        Diabetes
+                    </span>
+                </td>
+
+                <td>{{ record.age }}</td>
+
+                <td>{{ record.glucose }}</td>
+
+                <td>{{ record.bmi }}</td>
+
+                <td>
+
+                    {% if record.prediction == 1 %}
+
+                        <span class="hd-pill hd-pill--positive">
+                            Positive
+                        </span>
+
+                    {% else %}
+
+                        <span class="hd-pill hd-pill--negative">
+                            Negative
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+                    {{ record.probability }}%
+                </td>
+
+                <td>
+                    {{ record.created_at|date:"d M Y H:i" }}
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="7" class="hd-empty">
+                    No diabetes predictions found.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<h3 class="hd-section-title">Recent Heart Predictions</h3>
+
+<div class="hd-table-card">
+
+    <table class="hd-table">
+
+        <thead>
+            <tr>
+                <th>Disease</th>
+                <th>Age</th>
+                <th>Blood Pressure</th>
+                <th>Cholesterol</th>
+                <th>Result</th>
+                <th>Probability</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for record in recent_heart %}
+
+            <tr>
+
+                <td>
+                    <span class="hd-disease">
+                        Heart Disease
+                    </span>
+                </td>
+
+                <td>{{ record.age }}</td>
+
+                <td>{{ record.trestbps }}</td>
+
+                <td>{{ record.chol }}</td>
+
+                <td>
+
+                    {% if record.prediction == 1 %}
+
+                        <span class="hd-pill hd-pill--positive">
+                            Positive
+                        </span>
+
+                    {% else %}
+
+                        <span class="hd-pill hd-pill--negative">
+                            Negative
+                        </span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+                    {{ record.probability }}%
+                </td>
+
+                <td>
+                    {{ record.created_at|date:"d M Y H:i" }}
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="7" class="hd-empty">
+                    No heart disease predictions found.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- =====================================================
+     CHART.JS
+====================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const outcomeCanvas = document.getElementById("hdOutcomeChart");
+    if (outcomeCanvas) {
+        new Chart(outcomeCanvas, {
+            type: "doughnut",
+            data: {
+                labels: ["Positive", "Negative"],
+                datasets: [{
+                    data: [{{ positive_count|default:0 }}, {{ negative_count|default:0 }}],
+                    backgroundColor: ["#b91c1c", "#15803d"],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "72%",
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    const diseaseCanvas = document.getElementById("hdDiseaseChart");
+    if (diseaseCanvas) {
+        new Chart(diseaseCanvas, {
+            type: "bar",
+            data: {
+                labels: ["Diabetes", "Heart Disease", "ML Disease"],
+                datasets: [{
+                    label: "Predictions",
+                    data: [{{ diabetes_count|default:0 }}, {{ heart_count|default:0 }}, {{ ml_count|default:0 }}],
+                    backgroundColor: ["#f59e0b", "#dc2626", "#2563eb"],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+    }
+
+});
+</script>
+
+{% endblock %}

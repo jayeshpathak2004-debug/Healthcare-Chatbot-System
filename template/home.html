@@ -1,0 +1,1139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctors Cares — Your Health, Our Priority</title>
+
+    <!-- font awesome cdn link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+        /* ================= TOKENS (dark) ================= */
+        :root{
+            --bg:             #0A1F1B;   /* page background */
+            --bg-alt:         #112F28;   /* alternate panel background */
+            --card:           #143830;   /* card surface */
+            --card-hi:        #1B443A;   /* hovered / elevated card surface */
+            --line:           rgba(255,255,255,0.12);
+
+            --text:           #F1F7F4;   /* primary text — always light */
+            --text-soft:      #AFCFC5;   /* secondary text — still readable on dark */
+
+            --teal:           #2FA491;
+            --teal-bright:    #43C2AC;
+            --marigold:       #F2B25B;
+            --marigold-deep:  #D68F35;
+            --severe:         #E8695C;
+            --severe-soft:    rgba(232, 105, 92, 0.16);
+
+            --shadow-sm: 0 10px 24px -12px rgba(0,0,0,0.55);
+            --shadow-lg: 0 26px 55px -20px rgba(0,0,0,0.65);
+            --radius: 16px;
+        }
+
+        *{
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: "Inter", sans-serif;
+        }
+
+        html{ scroll-behavior: smooth; }
+
+        body{
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3{ font-family: "Fraunces", serif; color: var(--text); }
+
+        a{ text-decoration: none; color: inherit; }
+        img{ display:block; max-width: 100%; }
+        ul{ list-style: none; }
+
+        @media (prefers-reduced-motion: reduce){
+            *, *::before, *::after{ transition: none !important; animation: none !important; }
+        }
+
+        /* ================= SHARED ================= */
+        .eyebrow{
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--marigold);
+            margin-top: 5.5rem;
+        }
+
+        .heading{
+            text-align: center;
+            font-size: clamp(2rem, 4vw, 2.6rem);
+            font-weight: 600;
+            padding: 0.4rem 1rem 0.6rem;
+            color: var(--text);
+        }
+
+        .title{
+            text-align: center;
+            padding: 0 1rem;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--text-soft);
+            margin-bottom: 2rem;
+        }
+
+        .button{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            height: 3rem;
+            padding: 0 1.6rem;
+            background: var(--teal);
+            color: #08211C;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 1.5px solid var(--teal);
+            transition: all 0.2s ease;
+        }
+
+        .button:hover{
+            background: var(--teal-bright);
+            border-color: var(--teal-bright);
+            transform: translateY(-1px);
+        }
+
+        .button.ghost{
+            background: transparent;
+            color: var(--teal-bright);
+            border-color: var(--teal-bright);
+        }
+
+        .button.ghost:hover{
+            background: var(--teal-bright);
+            color: #08211C;
+        }
+
+        /* hero call-to-action: bigger, warmer, clearly the primary action */
+        .hero-cta{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            height: 3.4rem;
+            padding: 0 2rem;
+            font-size: 1.02rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            color: #2C1A05;
+            background: linear-gradient(120deg, var(--marigold), #f0c07c);
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow: 0 14px 30px -10px rgba(242, 178, 91, 0.45);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .hero-cta:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px -10px rgba(242, 178, 91, 0.6);
+        }
+
+        .hero-cta i{ font-size: 0.95rem; }
+
+        /* signature vital-line divider */
+        .vital-divider{
+            width: 100%;
+            max-width: 220px;
+            margin: 0 auto 2.5rem;
+            height: 18px;
+            opacity: 0.9;
+        }
+        .vital-divider svg{ width: 100%; height: 100%; display: block; }
+        .vital-divider path{
+            fill: none;
+            stroke: var(--marigold);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* ================= HEADER / NAV ================= */
+        header{
+            width: 94%;
+            max-width: 1320px;
+            min-height: 5.4rem;
+            background: rgba(15, 42, 36, 0.85);
+            backdrop-filter: blur(12px);
+            position: fixed;
+            top: 1.3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 2.4rem;
+            border-radius: 999px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--line);
+            z-index: 1000;
+        }
+
+        header .logo{
+            font-family: "Fraunces", serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        header .logo span{ color: var(--marigold); }
+
+        nav.navbar ul{
+            display: flex;
+            align-items: center;
+            gap: 2.4rem;
+        }
+
+        nav.navbar ul li a{
+            font-size: 1.08rem;
+            font-weight: 600;
+            color: var(--text-soft);
+            transition: color 0.2s;
+        }
+
+        nav.navbar ul li a:hover{ color: var(--marigold); }
+
+        /* auth area */
+        .auth-area{
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .auth-guest{ display: flex; align-items: center; gap: 0.9rem; }
+
+        .link-login{
+            font-size: 1.02rem;
+            font-weight: 600;
+            color: var(--text-soft);
+            padding: 0.5rem 0.6rem;
+        }
+        .link-login:hover{ color: var(--marigold); }
+
+        .btn-signup{
+            height: 2.9rem;
+            padding: 0 1.5rem;
+            font-size: 1rem;
+            background: var(--marigold);
+            border-color: var(--marigold);
+            color: #2C1A05;
+        }
+        .btn-signup:hover{
+            background: var(--marigold-deep);
+            border-color: var(--marigold-deep);
+        }
+
+        /* prediction highlight button (main module) */
+        .btn-prediction{
+            height: 2.9rem;
+            padding: 0 1.5rem;
+            font-size: 1rem;
+            background: var(--marigold);
+            border-color: var(--marigold);
+            color: #2C1A05;
+            box-shadow: 0 10px 22px -8px rgba(242, 178, 91, 0.55);
+        }
+        .btn-prediction:hover{
+            background: var(--marigold-deep);
+            border-color: var(--marigold-deep);
+            transform: translateY(-1px);
+        }
+
+        /* logged-in profile */
+        .profile{ position: relative; }
+
+        .profile-trigger{
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.4rem 1.1rem 0.4rem 0.4rem;
+            border-radius: 999px;
+            border: 1.5px solid var(--line);
+            cursor: pointer;
+            background: var(--card);
+            transition: border-color 0.2s;
+        }
+        .profile-trigger:hover{ border-color: var(--teal-bright); }
+
+        .profile-circle{
+            width: 2.5rem; height: 2.5rem;
+            border-radius: 50%;
+            background: var(--teal);
+            color: #08211C;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.05rem;
+            flex-shrink: 0;
+        }
+
+        .profile-name{
+            font-size: 0.98rem;
+            font-weight: 600;
+            color: var(--text);
+            max-width: 130px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .profile-trigger .fa-chevron-down{
+            font-size: 0.7rem;
+            color: var(--text-soft);
+            transition: transform 0.2s;
+        }
+        .profile.open .fa-chevron-down{ transform: rotate(180deg); }
+
+        .profile-menu{
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 200px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem;
+            opacity: 0;
+            transform: translateY(-8px);
+            pointer-events: none;
+            transition: all 0.18s ease;
+        }
+
+        .profile.open .profile-menu{
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .profile-menu a{
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.65rem 0.7rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .profile-menu a:hover{ background: var(--card-hi); }
+
+        .profile-menu a.logout{ color: var(--severe); }
+        .profile-menu a.logout:hover{ background: var(--severe-soft); }
+
+        .profile-menu .divider{
+            height: 1px;
+            background: var(--line);
+            margin: 0.35rem 0.4rem;
+        }
+
+        header .fa-bars, header .fa-xmark{
+            font-size: 1.8rem;
+            color: var(--marigold);
+            cursor: pointer;
+            display: none;
+        }
+
+        /* ================= HOME ================= */
+        .home{
+            min-height: 100vh;
+            padding-top: 11rem;
+            background:
+                radial-gradient(900px 500px at 85% -10%, rgba(47,164,145,0.16) 0%, transparent 60%),
+                var(--bg);
+        }
+
+        .home .row{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 3rem;
+            width: 88%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .home .content{ flex: 1; max-width: 520px; }
+
+        .home .content h1{
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            line-height: 1.15;
+            margin-bottom: 1rem;
+        }
+
+        .home .content h1 span{ color: var(--marigold); }
+
+        .home .content p{
+            font-size: 1.1rem;
+            color: var(--text-soft);
+            margin-bottom: 1.6rem;
+            line-height: 1.5;
+        }
+
+        .home .content .guest-prompt{
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .home .content .guest-prompt p{
+            margin: 0;
+            font-size: 0.98rem;
+            color: var(--text-soft);
+        }
+
+        .home .content .cta-row{
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .home .row .images{
+            flex: 1;
+            max-width: 480px;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--line);
+        }
+
+        .home .row .images img{
+            width: 100%;
+            transition: transform 0.5s ease;
+        }
+        .home .row .images:hover img{ transform: scale(1.05); }
+
+        /* ================= ABOUT ================= */
+        .about{ background: var(--bg-alt); padding-bottom: 3rem; }
+
+        .about .box-container{ width: 88%; max-width: 1100px; margin: 0 auto; }
+
+        .about .box-container .box{
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--line);
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
+            background: var(--card);
+            margin-bottom: 2.5rem;
+        }
+
+        .about .box-container .box .images{ width: 42%; overflow: hidden; }
+        .about .box-container .box .images img{
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.5s ease;
+            filter: brightness(0.9);
+        }
+        .about .box-container .box:hover .images img{ transform: scale(1.06); }
+
+        .about .box-container .box .content{
+            width: 58%;
+            padding: 2.2rem 2.4rem;
+        }
+
+        .about .box-container .box .content h3{ font-size: 1.6rem; margin-bottom: 0.9rem; color: var(--marigold); }
+
+        .about .box-container .box .content p{
+            font-size: 0.98rem;
+            line-height: 1.65;
+            color: var(--text-soft);
+            margin-bottom: 1.3rem;
+        }
+
+        .about .box-container .box:nth-child(even){ flex-direction: row-reverse; }
+
+        /* ================= DOCTORS ================= */
+        .doctor{ background: var(--bg); padding-bottom: 3rem; }
+
+        .doctor .box-container{
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            width: 90%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .doctor .box{
+            width: 300px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--card);
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .doctor .box:hover{
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            background: var(--card-hi);
+        }
+
+        .doctor .box img{ width: 100%; height: 260px; object-fit: cover; filter: brightness(0.9); }
+
+        .doctor .box .content{ padding: 1.2rem 1.3rem 1.4rem; text-align: center; }
+
+        .doctor .box .content h2{
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .doctor .box .content h2:hover{ color: var(--marigold); }
+
+        .doctor .box .content p{
+            font-size: 0.9rem;
+            color: var(--text-soft);
+            margin: 0.2rem 0 0.8rem;
+        }
+
+        .doctor .box .icons a{
+            font-size: 1.05rem;
+            color: var(--teal-bright);
+            margin: 0 0.5rem;
+            transition: color 0.2s;
+        }
+        .doctor .box .icons a:hover{ color: var(--marigold); }
+
+        /* ================= REVIEWS ================= */
+        .review{ background: var(--bg-alt); padding-bottom: 3.5rem; }
+
+        .review .box-container{
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.8rem;
+            width: 90%;
+            max-width: 1150px;
+            margin: 0 auto;
+        }
+
+        .review .box{
+            width: 340px;
+            padding: 2rem 1.8rem 1.6rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--line);
+            background: var(--card);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .review .box i.fa-quote-left{
+            font-size: 1.6rem;
+            color: var(--marigold);
+            opacity: 0.9;
+        }
+
+        .review .box p{
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text);
+            padding: 1rem 0;
+        }
+
+        .review .box .images{
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid var(--line);
+        }
+
+        .review .box .images img{
+            height: 3rem; width: 3rem;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .review .box .info h3{ font-size: 1rem; color: var(--marigold); }
+        .review .box .info span{ font-size: 0.82rem; color: var(--text-soft); }
+
+        /* ================= CONTACT ================= */
+        .contact{ background: var(--bg); padding-bottom: 3.5rem; }
+
+        .contact .row{
+            display: flex;
+            align-items: stretch;
+            gap: 3rem;
+            width: 88%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .contact .row .images{
+            flex: 1;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--line);
+        }
+        .contact .row .images img{ width: 100%; height: 100%; object-fit: cover; filter: brightness(0.9); }
+
+        .contact .form-container{
+            flex: 1;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-top: 5px solid var(--marigold);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            padding: 2.2rem 2rem 2rem;
+        }
+
+        .contact .form-container .field{
+            position: relative;
+            margin: 0.7rem 0;
+        }
+
+        .contact .form-container .field i{
+            position: absolute;
+            top: 50%;
+            left: 1rem;
+            transform: translateY(-50%);
+            color: var(--teal-bright);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .contact .form-container .field.textarea i{ top: 1.3rem; transform: none; }
+
+        .contact .form-container input,
+        .contact .form-container textarea{
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 2.6rem;
+            border: 1.5px solid var(--line);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: var(--bg-alt);
+            outline: none;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+
+        .contact .form-container input::placeholder,
+        .contact .form-container textarea::placeholder{ color: var(--text-soft); opacity: 0.8; }
+
+        .contact .form-container input:focus,
+        .contact .form-container textarea:focus{
+            border-color: var(--teal-bright);
+            background: var(--card-hi);
+            box-shadow: 0 0 0 3px rgba(67, 194, 172, 0.18);
+        }
+
+        .contact .form-container textarea{ resize: vertical; min-height: 140px; }
+
+        .contact .form-container input[type="submit"]{
+            width: 100%;
+            background: linear-gradient(120deg, var(--teal), var(--teal-bright));
+            color: #08211C;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            border: none;
+            margin-top: 1rem;
+            padding: 1rem 1.8rem;
+            border-radius: 10px;
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
+        }
+        .contact .form-container input[type="submit"]:hover{
+            box-shadow: 0 12px 26px -8px rgba(67, 194, 172, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* ================= BLOG ================= */
+        .blog{ background: var(--bg-alt); padding-bottom: 3.5rem; }
+
+        .blog .box-container{
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.8rem;
+            width: 90%;
+            max-width: 1150px;
+            margin: 0 auto;
+        }
+
+        .blog .box{
+            width: 340px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow-sm);
+            background: var(--card);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .blog .box:hover{ transform: translateY(-6px); box-shadow: var(--shadow-lg); background: var(--card-hi); }
+
+        .blog .box img{ width: 100%; height: 190px; object-fit: cover; filter: brightness(0.9); }
+
+        .blog .box .content{ padding: 1.3rem 1.4rem 1.5rem; }
+
+        .blog .box .content h2{ font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--marigold); }
+
+        .blog .box .content p{
+            font-size: 0.9rem;
+            color: var(--text-soft);
+            line-height: 1.55;
+            margin-bottom: 0.9rem;
+        }
+
+        /* ================= FOOTER ================= */
+        .footer{
+            background: #071813;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 2rem;
+            padding: 3.5rem 6% 2rem;
+            border-top: 1px solid var(--line);
+        }
+
+        .footer .box{ width: 260px; }
+        .footer .box:first-child{ width: 320px; }
+
+        .footer .logo{
+            font-family: "Fraunces", serif;
+            font-size: 1.6rem;
+            color: var(--text);
+            margin-bottom: 0.9rem;
+        }
+        .footer .logo span{ color: var(--marigold); }
+
+        .footer .box p{
+            font-size: 0.9rem;
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+
+        .footer h4{
+            font-family: "Inter", sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--marigold);
+            margin-bottom: 1rem;
+        }
+
+        .footer a{
+            display: block;
+            font-size: 0.92rem;
+            color: var(--text-soft);
+            padding: 0.3rem 0;
+            transition: color 0.2s, transform 0.2s;
+        }
+        .footer a:hover{ color: var(--text); transform: translateX(4px); }
+
+        .footer .credit{
+            width: 100%;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--text-soft);
+            border-top: 1px solid var(--line);
+            padding-top: 1.5rem;
+            margin-top: 1rem;
+        }
+        .footer .credit span{ color: var(--marigold); }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 900px){
+            .about .box-container .box,
+            .about .box-container .box:nth-child(even){
+                flex-direction: column;
+            }
+            .about .box-container .box .images,
+            .about .box-container .box .content{ width: 100%; }
+            .about .box-container .box .images{ height: 220px; }
+
+            .contact .row{ flex-direction: column; }
+            .contact .row .images{ min-height: 220px; }
+        }
+
+        @media (max-width: 768px){
+            header{ top: 0; width: 100%; border-radius: 0; left: 0; transform: none; }
+
+            header .fa-bars{ display: block; }
+
+            nav.navbar{
+                position: fixed;
+                top: 5.6rem;
+                right: 1rem;
+                width: 220px;
+                background: var(--card);
+                border-radius: 14px;
+                border: 1px solid var(--line);
+                box-shadow: var(--shadow-lg);
+                padding: 1rem;
+                opacity: 0;
+                transform: translateY(-10px);
+                pointer-events: none;
+                transition: all 0.2s ease;
+            }
+
+            nav.navbar.active{
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            nav.navbar ul{ flex-direction: column; align-items: flex-start; gap: 0.9rem; }
+
+            .home .row{ flex-direction: column-reverse; text-align: center; }
+            .home .content{ max-width: 100%; }
+            .home .content .guest-prompt{ justify-content: center; }
+            .home .row .images{ max-width: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============ HEADER / NAVBAR ============ -->
+    <header>
+        <a href="#home" class="logo"><span>D</span>octors <span>C</span>ares</a>
+
+        <nav class="navbar" id="navbar">
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#doctor">Doctors</a></li>
+                <li><a href="#review">Reviews</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#blog">Blog</a></li>
+            </ul>
+        </nav>
+
+<!--        <div class="auth-area">-->
+<!--            <a href="{% url 'prediction_home' %}" class="button btn-prediction">-->
+<!--                <i class="fa-solid fa-chart-line"></i> Prediction-->
+<!--            </a>-->
+
+            {% if request.session.uname %}
+                <div class="profile" id="profile">
+                    <div class="profile-trigger" onclick="toggleProfile()">
+                        <span class="profile-circle">{{ request.session.uname|first|upper }}</span>
+                        <span class="profile-name">{{ request.session.uname }}</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </div>
+                    <div class="profile-menu">
+                        <a href="{% url 'chatbot' %}"><i class="fa-solid fa-comment-medical"></i> Ask questions</a>
+                        <div class="divider"></div>
+                        <a class="logout" href="{% url 'logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log out</a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="auth-guest">
+                    <a href="{% url 'login' %}" class="link-login">Log in</a>
+                    <a href="{% url 'register' %}" class="button btn-signup">Sign up</a>
+                </div>
+            {% endif %}
+
+            <i class="fa-solid fa-bars" id="menuOpen" onclick="toggleMenu()"></i>
+        </div>
+    </header>
+
+    <!-- ============ HOME ============ -->
+    <section id="home" class="home">
+        <div class="row">
+            <div class="content">
+                <h1><span>Stay</span> Safe, <span>Stay</span> Healthy.</h1>
+                <p>Your health is your greatest wealth. Prioritize it every day, with round-the-clock guidance from Doctors Cares.</p>
+
+                {% if request.session.uname %}
+                    <div class="cta-row">
+                        <a href="{% url 'chatbot' %}"><button class="hero-cta">Ask questions <i class="fa-solid fa-arrow-right"></i></button></a>
+                        <a href="{% url 'prediction_home' %}"><button class="hero-cta"><i class="fa-solid fa-chart-line"></i> Try Prediction</button></a>
+                    </div>
+                {% else %}
+                    <div class="guest-prompt">
+                        <p>Log in to start a conversation with our health assistant.</p>
+                        <a href="{% url 'login' %}"><button class="hero-cta"><i class="fa-solid fa-right-to-bracket"></i> Log in to continue</button></a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="images">
+                <img src="{% static 'image/home.png' %}" alt="Doctor caring for a patient">
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section id="about" class="about">
+        <p class="eyebrow">Our facility</p>
+        <h1 class="heading">Care built around you</h1>
+        <h3 class="title">Learn what makes Doctors Cares different</h3>
+        <div class="vital-divider">
+            <svg viewBox="0 0 200 18" preserveAspectRatio="none"><path d="M0 9 H70 L82 1 L96 17 L110 3 L122 9 H200"/></svg>
+        </div>
+
+        <div class="box-container">
+            <div class="box">
+                <div class="images">
+                    <img src="{% static 'image/about-1.png' %}" alt="Symptom checker feature">
+                </div>
+                <div class="content">
+                    <h3>Features</h3>
+                    <p>
+                        A symptom checker that helps identify likely conditions from what you describe.
+                        Personalized health tips for a healthier daily routine.
+                        Round-the-clock access whenever you need support.
+                        And support in your preferred language, so nothing gets lost in translation.
+                    </p>
+                    <button class="button ghost">Learn more</button></a>
+                </div>
+            </div>
+
+            <div class="box">
+                <div class="images">
+                    <img src="{% static 'image/about-3.png' %}" alt="Why choose Doctors Cares">
+                </div>
+                <div class="content">
+                    <h3>Why choose us?</h3>
+                    <p>
+                        Fast, reliable answers whenever you need them.
+                        A simple experience designed for everyone, not just the tech-savvy.
+                        Encrypted, compliant systems that keep your data private.
+                        Essential tools available at no cost, always.
+                    </p>
+                    <button class="button ghost">Learn more</button></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ DOCTORS ============ -->
+    <section id="doctor" class="doctor">
+        <p class="eyebrow">Our team</p>
+        <h1 class="heading">Doctors</h1>
+        <h3 class="title">Our professional physicians, here for you</h3>
+
+        <div class="box-container">
+            <div class="box">
+                <img src="{% static 'image/doctor-1.jpg' %}" alt="Dr. Ananya Kulkarni">
+                <div class="content">
+                    <a href="#"><h2>Dr. Ananya Kulkarni</h2></a>
+                    <p>General Physician</p>
+                    <div class="icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <img src="{% static 'image/doctor-2.jpg' %}" alt="Dr. Rohan Mehta">
+                <div class="content">
+                    <a href="#"><h2>Dr. Rohan Mehta</h2></a>
+                    <p>Family Medicine</p>
+                    <div class="icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <img src="{% static 'image/doctor-3.jpg' %}" alt="Dr. Sanjana Iyer">
+                <div class="content">
+                    <a href="#"><h2>Dr. Sanjana Iyer</h2></a>
+                    <p>Internal Medicine</p>
+                    <div class="icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ REVIEWS ============ -->
+    <section id="review" class="review">
+        <p class="eyebrow">Patient stories</p>
+        <h1 class="heading">Our patient reviews</h1>
+        <h3 class="title">What patients say about us</h3>
+
+        <div class="box-container">
+            <div class="box">
+                <i class="fas fa-quote-left"></i>
+                <p>The chatbot was very helpful and easy to use. It answered all my questions promptly and guided me through booking my appointment effortlessly.</p>
+                <div class="images">
+                    <img src="{% static 'image/img-1.jpg' %}" alt="Patient photo">
+                    <div class="info">
+                        <h3>Priya Deshmukh</h3>
+                        <span>January 2025</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <i class="fas fa-quote-left"></i>
+                <p>I found the chatbot very informative, and it gave accurate responses to my medical queries. Efficient and it saved me a lot of time.</p>
+                <div class="images">
+                    <img src="{% static 'image/img-2.jpg' %}" alt="Patient photo">
+                    <div class="info">
+                        <h3>Karan Shah</h3>
+                        <span>February 2025</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <i class="fas fa-quote-left"></i>
+                <p>Using the chatbot was a great experience. It helped me check my symptoms and gave clear advice on when to consult a doctor.</p>
+                <div class="images">
+                    <img src="{% static 'image/img-3.jpg' %}" alt="Patient photo">
+                    <div class="info">
+                        <h3>Meera Joshi</h3>
+                        <span>March 2025</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ CONTACT ============ -->
+    <section id="contact" class="contact">
+        <p class="eyebrow">Get in touch</p>
+        <h1 class="heading">Contact us</h1>
+        <h3 class="title">You can talk to us anytime</h3>
+
+        <div class="row">
+            <div class="images">
+                <img src="{% static 'image/form.png' %}" alt="Contact illustration">
+            </div>
+
+            <form method="post" action="">
+                <div class="form-container">
+                    {% csrf_token %}
+                    <div class="field">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" placeholder="Full name" name="full_name" required>
+                    </div>
+                    <div class="field">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" placeholder="Enter your email" name="email" required>
+                    </div>
+                    <div class="field">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="tel" placeholder="Phone" name="phone">
+                    </div>
+                    <div class="field textarea">
+                        <i class="fa-solid fa-comment-dots"></i>
+                        <textarea name="message" placeholder="Message" required></textarea>
+                    </div>
+                    <input type="submit" value="Send message">
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- ============ BLOG ============ -->
+    <section id="blog" class="blog">
+        <p class="eyebrow">Resources</p>
+        <h1 class="heading">Blog</h1>
+        <h3 class="title">Health-related information</h3>
+
+        <div class="box-container">
+            <div class="box">
+                <img src="{% static 'image/blog 1.png' %}" alt="Diabetes management">
+                <div class="content">
+                    <a href="#"><h2>Diabetes</h2></a>
+                    <p>Living with diabetes requires a balance of healthy eating, regular exercise, and proper medication. Monitor your blood sugar levels consistently and stay hydrated.</p>
+                    <a href="#"><button class="button ghost">Learn more</button></a>
+                </div>
+            </div>
+
+            <div class="box">
+                <img src="{% static 'image/blog 2.png' %}" alt="COVID-19 vaccine">
+                <div class="content">
+                    <a href="#"><h2>COVID-19 vaccine</h2></a>
+                    <p>COVID-19 vaccines are a safe and effective way to protect yourself and others from severe illness, and they're key to controlling the spread of the virus.</p>
+                    <a href="#"><button class="button ghost">Learn more</button></a>
+                </div>
+            </div>
+
+            <div class="box">
+                <img src="{% static 'image/blog 3.png' %}" alt="Preventing epidemics">
+                <div class="content">
+                    <a href="#"><h2>Prevent epidemic</h2></a>
+                    <p>Stay informed and vaccinated, and practice good hygiene: wash hands frequently, wear masks when necessary, and avoid close contact with sick individuals.</p>
+                    <a href="#"><button class="button ghost">Learn more</button></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <section class="footer">
+        <div class="box">
+            <h2 class="logo"><span>D</span>octors <span>C</span>ares</h2>
+            <p>Round-the-clock guidance and care, designed to be simple, private, and accessible to everyone.</p>
+        </div>
+
+        <div class="box">
+            <h4>Share</h4>
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">Instagram</a>
+            <a href="#">Pinterest</a>
+        </div>
+
+        <div class="box">
+            <h4>Links</h4>
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#doctor">Doctors</a>
+            <a href="#review">Reviews</a>
+            <a href="#contact">Contact</a>
+            <a href="#blog">Blog</a>
+        </div>
+
+        <p class="credit">© 2026 Designed &amp; developed by <span>Varsha Shirsath</span>. All rights reserved.</p>
+    </section>
+
+    <script>
+        function toggleMenu(){
+            const nav = document.getElementById('navbar');
+            const icon = document.getElementById('menuOpen');
+            nav.classList.toggle('active');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-xmark');
+        }
+
+        function toggleProfile(){
+            document.getElementById('profile').classList.toggle('open');
+        }
+
+        document.addEventListener('click', function(e){
+            const profile = document.getElementById('profile');
+            if (profile && !profile.contains(e.target)) profile.classList.remove('open');
+        });
+    </script>
+</body>
+</html>

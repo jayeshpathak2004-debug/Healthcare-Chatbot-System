@@ -1,0 +1,566 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<style>
+/* =========================================
+   AI SYMPTOM ANALYZER FORM
+   (uses --ink, --ink-soft, --cyan, --coral,
+   --blue, --green, --slate, --card, --line
+   from base.html)
+========================================= */
+
+.ml-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 20px 90px;
+}
+
+/* ---------- HEADER (on dark page bg) ---------- */
+
+.ml-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 14px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--cyan);
+}
+
+.ml-eyebrow::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 0 4px rgba(95, 214, 200, .18), 0 0 10px rgba(95, 214, 200, .55);
+}
+
+.ml-title {
+    margin: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: clamp(30px, 4.5vw, 42px);
+    font-weight: 700;
+    letter-spacing: -1.4px;
+    color: var(--ink);
+}
+
+.ml-title .accent {
+    background: linear-gradient(100deg, var(--cyan), var(--coral));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.ml-subtitle {
+    max-width: 520px;
+    margin: 12px 0 0;
+    font-family: "Inter", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+}
+
+.ml-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 22px;
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate);
+    text-decoration: none;
+    transition: color .2s ease, gap .2s ease;
+}
+
+.ml-back svg { width: 15px; height: 15px; stroke: currentColor; transition: transform .2s ease; }
+.ml-back:hover { color: var(--cyan); }
+.ml-back:hover svg { transform: translateX(-3px); }
+
+/* ---------- FORM CARD ---------- */
+
+.ml-container {
+    margin-top: 26px;
+    background: var(--card);
+    padding: 38px;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, .35), 0 0 0 1px rgba(255, 255, 255, .04);
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    color: #16202c;
+    margin-bottom: 9px;
+}
+
+.form-group label svg {
+    width: 16px;
+    height: 16px;
+    stroke: var(--blue);
+    flex-shrink: 0;
+}
+
+.form-group.symptoms-group label svg { stroke: var(--cyan); }
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid #dfe4ea;
+    border-radius: 11px;
+    font-size: 15px;
+    font-family: "Inter", sans-serif;
+    color: #16202c;
+    background: #fbfcfe;
+    box-sizing: border-box;
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.form-group textarea {
+    min-height: 150px;
+    resize: vertical;
+    line-height: 1.55;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(79, 168, 201, .13);
+}
+
+/* Invalid state, set by validation script */
+.form-group.invalid input,
+.form-group.invalid select,
+.form-group.invalid textarea {
+    border-color: #d9534f;
+    background: #fff8f7;
+    box-shadow: 0 0 0 4px rgba(217, 83, 79, .1);
+}
+
+.field-error {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin-top: 7px;
+    font-family: "Inter", sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #c0392b;
+}
+
+.form-group.invalid .field-error { display: flex; }
+.field-error svg { width: 13px; height: 13px; stroke: currentColor; flex-shrink: 0; }
+
+.char-counter {
+    display: block;
+    margin-top: 7px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: .3px;
+    color: #9aa7b1;
+    text-align: right;
+}
+
+.char-counter.ok { color: #1c8f7f; }
+
+/* ---------- BUTTON ROW ---------- */
+
+.button-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border: none;
+    border-radius: 12px;
+    font-family: "Inter", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.btn svg { width: 17px; height: 17px; stroke: currentColor; }
+
+.btn-clear {
+    flex: 0 0 auto;
+    padding: 15px 22px;
+    background: #f1f4f8;
+    color: #55626d;
+}
+
+.btn-clear:hover { background: #e6eaf0; }
+
+.btn-predict {
+    flex: 1;
+    padding: 16px 22px;
+    color: #ffffff;
+    background: linear-gradient(120deg, #2a8fae 0%, #1c8f7f 100%);
+    box-shadow: 0 12px 28px rgba(42, 143, 174, .32);
+}
+
+.btn-predict:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px rgba(42, 143, 174, .4);
+}
+
+.btn-predict:active { transform: translateY(0); }
+
+.btn:disabled { opacity: .6; cursor: not-allowed; transform: none !important; }
+
+/* ---------- SUCCESS ---------- */
+
+.success {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 22px;
+    padding: 15px 18px;
+    background: rgba(111, 214, 160, .14);
+    color: #1e7e34;
+    border-radius: 11px;
+    font-weight: 700;
+    font-size: 14px;
+    font-family: "Inter", sans-serif;
+}
+
+.success svg { width: 18px; height: 18px; stroke: currentColor; flex-shrink: 0; }
+
+/* ---------- RESULT ---------- */
+
+.result {
+    margin-top: 30px;
+    padding: 26px;
+    background: #f4faf9;
+    border-radius: 14px;
+    border-left: 4px solid var(--cyan);
+}
+
+.result h2 {
+    margin: 0 0 4px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    color: #55626d;
+    text-transform: uppercase;
+}
+
+.disease {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 27px;
+    font-weight: 700;
+    color: #16202c;
+    margin: 10px 0 24px;
+}
+
+.result h3 {
+    margin: 0 0 12px;
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #55626d;
+}
+
+.prediction {
+    background: #ffffff;
+    padding: 14px 16px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: 1px solid #e4e9ee;
+}
+
+.prediction-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    color: #16202c;
+    margin-bottom: 9px;
+}
+
+.percentage { font-weight: 700; color: var(--blue); font-family: "JetBrains Mono", monospace; }
+
+.prediction-bar {
+    height: 6px;
+    border-radius: 4px;
+    background: #eef1f4;
+    overflow: hidden;
+}
+
+.prediction-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    width: 0%;
+    transition: width 1s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* ---------- WARNING ---------- */
+
+.warning {
+    display: flex;
+    gap: 12px;
+    margin-top: 26px;
+    padding: 16px 18px;
+    background: rgba(244, 168, 139, .14);
+    color: #7a4a30;
+    border-radius: 11px;
+    font-size: 13px;
+    line-height: 1.6;
+    font-family: "Inter", sans-serif;
+}
+
+.warning svg { width: 19px; height: 19px; stroke: currentColor; flex-shrink: 0; margin-top: 1px; }
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 600px) {
+    .ml-page { padding: 40px 16px 70px; }
+    .ml-container { padding: 26px; }
+    .disease { font-size: 23px; }
+    .button-row { flex-direction: column; }
+    .btn-clear { order: 2; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ml-page">
+
+    <p class="ml-eyebrow">Multiple Symptom Analyzer</p>
+    <h1 class="ml-title"> Multiple Disease <span class="accent">Prediction</span></h1>
+    <p class="ml-subtitle">
+        Describe the patient's symptoms in your own words and the trained
+        machine learning model will suggest the most likely conditions,
+        ranked by probability.
+    </p>
+
+    <a class="ml-back" href="{% url 'prediction_home' %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        Back to overview
+    </a>
+
+    <div class="ml-container">
+
+        <form method="POST" id="ml-form" novalidate>
+            {% csrf_token %}
+
+            <div class="form-group" data-field="patient_name">
+                <label for="patient_name">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg>
+                    Patient Name
+                </label>
+                <input type="text" id="patient_name" name="patient_name" value="{{ patient_name }}" placeholder="Enter patient name" required>
+                <div class="field-error">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                    <span>Enter a valid name (letters only, at least 2 characters).</span>
+                </div>
+            </div>
+
+            <div class="form-group" data-field="age">
+                <label for="age">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>
+                    Age
+                </label>
+                <input type="number" id="age" name="age" value="{{ age }}" min="1" max="120" placeholder="Enter patient age" required>
+                <div class="field-error">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                    <span>Enter a valid age between 1 and 120.</span>
+                </div>
+            </div>
+
+            <div class="form-group" data-field="gender">
+                <label for="gender">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
+                    Gender
+                </label>
+                <select id="gender" name="gender" required>
+                    <option value="">Select gender</option>
+                    <option value="Male" {% if gender == "Male" %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if gender == "Female" %}selected{% endif %}>Female</option>
+                    <option value="Other" {% if gender == "Other" %}selected{% endif %}>Other</option>
+                </select>
+                <div class="field-error">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                    <span>Please select a gender.</span>
+                </div>
+            </div>
+
+            <div class="form-group symptoms-group" data-field="symptoms">
+                <label for="symptoms">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 3v3M15 3v3M6 9h12M6 12h12M6 15h8"/></svg>
+                    Patient Symptoms
+                </label>
+                <textarea id="symptoms" name="symptoms" placeholder="Example: high fever, severe body pain, headache, rash and pain behind the eyes..." required>{{ symptoms }}</textarea>
+                <div class="field-error">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                    <span>Describe symptoms in at least 3 words so the model has enough to work with.</span>
+                </div>
+                <span class="char-counter" id="symptoms-counter">0 characters</span>
+            </div>
+
+            <div class="button-row">
+                <button type="reset" class="btn btn-clear" id="clear-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    Clear
+                </button>
+                <button type="submit" class="btn btn-predict">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                    Predict Disease
+                </button>
+            </div>
+
+        </form>
+
+        {% if saved %}
+        <div class="success">
+            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>
+            Prediction saved successfully.
+        </div>
+        {% endif %}
+
+        {% if result %}
+        <div class="result">
+            <h2>Predicted Disease</h2>
+            <div class="disease">{{ result|title }}</div>
+
+            <h3>Top 3 Possible Diseases</h3>
+
+            {% for item in top_predictions %}
+            <div class="prediction">
+                <div class="prediction-top">
+                    <span>{{ forloop.counter }}. {{ item.disease|title }}</span>
+                    <span class="percentage">{{ item.probability }}%</span>
+                </div>
+                <div class="prediction-bar">
+                    <span data-width="{{ item.probability }}"></span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="warning">
+            <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 16.5h.01M10.3 3.9L2.9 17a1.8 1.8 0 001.6 2.7h15a1.8 1.8 0 001.6-2.7L13.7 3.9a1.8 1.8 0 00-3.4 0z"/></svg>
+            <span><strong>Important:</strong> This application provides an ML-based prediction from the symptoms entered. It is not a medical diagnosis — please consult a qualified healthcare professional for proper diagnosis and treatment.</span>
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    var form = document.getElementById("ml-form");
+    if (!form) return;
+
+    var rules = {
+        patient_name: function (v) {
+            v = v.trim();
+            return /^[A-Za-z\s.'-]{2,50}$/.test(v);
+        },
+        age: function (v) {
+            var n = Number(v);
+            return v.trim() !== "" && Number.isInteger(n) && n >= 1 && n <= 120;
+        },
+        gender: function (v) {
+            return v.trim() !== "";
+        },
+        symptoms: function (v) {
+            v = v.trim();
+            var words = v.split(/\s+/).filter(Boolean);
+            return v.length >= 10 && words.length >= 3;
+        }
+    };
+
+    function groupFor(name) {
+        return form.querySelector('.form-group[data-field="' + name + '"]');
+    }
+
+    function validateField(name) {
+        var field = form.elements[name];
+        var group = groupFor(name);
+        if (!field || !group) return true;
+
+        var valid = rules[name](field.value || "");
+        group.classList.toggle("invalid", !valid);
+        return valid;
+    }
+
+    Object.keys(rules).forEach(function (name) {
+        var field = form.elements[name];
+        if (!field) return;
+        field.addEventListener("blur", function () { validateField(name); });
+        field.addEventListener("input", function () {
+            if (groupFor(name).classList.contains("invalid")) validateField(name);
+        });
+    });
+
+    // Live character counter for symptoms
+    var symptoms = form.elements["symptoms"];
+    var counter = document.getElementById("symptoms-counter");
+    function updateCounter() {
+        var len = symptoms.value.trim().length;
+        counter.textContent = len + " characters";
+        counter.classList.toggle("ok", len >= 10);
+    }
+    if (symptoms && counter) {
+        symptoms.addEventListener("input", updateCounter);
+        updateCounter();
+    }
+
+    form.addEventListener("submit", function (e) {
+        var allValid = Object.keys(rules).map(validateField).every(Boolean);
+        if (!allValid) {
+            e.preventDefault();
+            var firstInvalid = form.querySelector(".form-group.invalid input, .form-group.invalid select, .form-group.invalid textarea");
+            if (firstInvalid) {
+                firstInvalid.focus();
+                firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    });
+
+    document.getElementById("clear-btn").addEventListener("click", function () {
+        setTimeout(function () {
+            form.querySelectorAll(".form-group.invalid").forEach(function (g) {
+                g.classList.remove("invalid");
+            });
+            updateCounter();
+        }, 0);
+    });
+
+    // Animate probability bars in on load
+    document.querySelectorAll(".prediction-bar span").forEach(function (bar) {
+        var target = bar.getAttribute("data-width") || 0;
+        requestAnimationFrame(function () {
+            setTimeout(function () { bar.style.width = target + "%"; }, 80);
+        });
+    });
+})();
+</script>
+{% endblock %}

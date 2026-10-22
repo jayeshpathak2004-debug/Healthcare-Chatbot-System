@@ -1,0 +1,1022 @@
+```html
+{% extends "base.html" %}
+
+{% block extra_head %}
+
+<style>
+
+/* ==========================================
+   HEART DISEASE PREDICTION PAGE
+========================================== */
+
+.rx-card {
+    max-width: 950px;
+    margin: 1.5rem auto;
+    padding: 1.6rem 1.8rem;
+
+    background: var(--card, #FFFFFF);
+    border: 1px solid var(--line, #DDE6E4);
+    border-radius: 18px;
+
+    box-shadow: 0 14px 32px rgba(27, 75, 90, .08);
+}
+
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.rx-eyebrow {
+    max-width: 950px;
+    margin: 2.2rem auto .4rem;
+    padding: 0 1.5rem;
+
+    color: var(--coral, #F4A88B);
+
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    font-weight: 600;
+
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+
+.rx-title {
+    max-width: 950px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.25rem;
+    line-height: 1.15;
+
+    color: var(--ink, #1E2D3D);
+
+    letter-spacing: -.03em;
+}
+
+
+.rx-sub {
+    max-width: 950px;
+    margin: .55rem auto 0;
+    padding: 0 1.5rem;
+
+    color: var(--slate, #6E8291);
+
+    font-size: .9rem;
+    line-height: 1.55;
+}
+
+
+/* ==========================================
+   PULSE
+========================================== */
+
+.rx-pulse {
+    display: block;
+
+    width: min(950px, calc(100% - 3rem));
+    height: 30px;
+
+    margin: 1rem auto;
+}
+
+
+.rx-pulse path {
+    fill: none;
+
+    stroke: var(--teal, #3C8DA3);
+
+    stroke-width: 2;
+}
+
+
+/* ==========================================
+   FIELDSET
+========================================== */
+
+.rx-card fieldset {
+
+    border: 1px solid var(--line, #DDE6E4);
+
+    border-radius: 13px;
+
+    padding: 1.1rem 1.2rem;
+
+    margin: 0 0 1rem;
+}
+
+
+.rx-card legend {
+
+    padding: 0 .55rem;
+
+    font-family: 'Space Grotesk', sans-serif;
+
+    font-size: .9rem;
+
+    font-weight: 700;
+
+    color: var(--teal, #3C8DA3);
+}
+
+
+/* ==========================================
+   GRID
+========================================== */
+
+.rx-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    column-gap: 1.25rem;
+
+    row-gap: .85rem;
+}
+
+
+/* ==========================================
+   FIELD
+========================================== */
+
+.rx-field {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: .28rem;
+
+    min-width: 0;
+}
+
+
+.rx-field label {
+
+    margin: 0;
+
+    font-size: .82rem;
+
+    line-height: 1.25;
+
+    font-weight: 600;
+
+    color: #1E2D3D;
+}
+
+
+.rx-field .unit {
+
+    color: #71818C;
+
+    font-weight: 400;
+}
+
+
+/* ==========================================
+   INPUT / SELECT
+========================================== */
+
+.rx-field input,
+.rx-field select {
+
+    width: 100%;
+    height: 38px;
+
+    box-sizing: border-box;
+
+    padding: .45rem .75rem;
+
+    border: 1px solid var(--line, #DDE6E4);
+
+    border-radius: 8px;
+
+    background: #F5F8F7;
+
+    color: #1E2D3D;
+
+    font-family: 'Inter', sans-serif;
+
+    font-size: .84rem;
+
+    outline: none;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+}
+
+
+.rx-field input:focus,
+.rx-field select:focus {
+
+    border-color:
+        var(--teal, #3C8DA3);
+
+    background: #FFFFFF;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(60, 141, 163, .12);
+}
+
+
+.rx-field input::placeholder {
+
+    color: #9AA7AE;
+}
+
+
+/* ==========================================
+   HINT
+========================================== */
+
+.rx-field .hint {
+
+    margin: 0;
+
+    color: #7A8992;
+
+    font-size: .67rem;
+
+    line-height: 1.2;
+}
+
+
+/* ==========================================
+   ACTION BAR
+========================================== */
+
+.action-bar {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    gap: .65rem;
+
+    width: 100%;
+
+    margin-top: 1.2rem;
+
+    padding-top: .2rem;
+}
+
+
+/* ==========================================
+   BUTTON BASE
+========================================== */
+
+.action-bar .btn,
+.action-bar .rx-submit {
+
+    height: 38px;
+
+    padding: 0 1rem;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 8px;
+
+    font-family: 'Inter', sans-serif;
+
+    font-size: .82rem;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    box-sizing: border-box;
+
+    transition: all .2s ease;
+}
+
+
+/* ==========================================
+   BACK
+========================================== */
+
+.action-bar .btn-outline {
+
+    min-width: 82px;
+
+    background: transparent;
+
+    border: 1px solid var(--teal, #3C8DA3);
+
+    color: var(--teal, #3C8DA3);
+}
+
+
+.action-bar .btn-outline:hover {
+
+    background: var(--teal, #3C8DA3);
+
+    color: #FFFFFF;
+}
+
+
+/* ==========================================
+   CLEAR
+========================================== */
+
+.action-bar .btn-neutral {
+
+    min-width: 82px;
+
+    background: #EEF3F2;
+
+    border: 1px solid #EEF3F2;
+
+    color: #1E2D3D;
+}
+
+
+.action-bar .btn-neutral:hover {
+
+    background: #E3EBE9;
+}
+
+
+/* ==========================================
+   PREDICT RISK
+========================================== */
+
+.action-bar .rx-submit {
+
+    min-width: 145px;
+
+    border: none;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--teal, #3C8DA3),
+            var(--teal-deep, #1B4B5A)
+        );
+
+    color: #FFFFFF;
+
+    box-shadow:
+        0 10px 20px -12px
+        rgba(60, 141, 163, .55);
+}
+
+
+.action-bar .rx-submit:hover {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--coral, #F4A88B),
+            var(--teal, #3C8DA3)
+        );
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 14px 26px -12px
+        rgba(60, 141, 163, .55);
+}
+
+
+/* ==========================================
+   RESULT
+========================================== */
+
+.rx-result {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: .8rem;
+
+    margin-top: 1rem;
+
+    padding: 1rem 1.2rem;
+
+    border-radius: 11px;
+
+    border: 1px solid var(--line, #DDE6E4);
+}
+
+
+.rx-result.is-detected {
+
+    background:
+        rgba(244, 168, 139, .10);
+
+    border-color:
+        rgba(244, 168, 139, .30);
+}
+
+
+.rx-result.is-clear {
+
+    background:
+        rgba(111, 184, 138, .10);
+
+    border-color:
+        rgba(111, 184, 138, .30);
+}
+
+
+.rx-dot {
+
+    width: 9px;
+    height: 9px;
+    min-width: 9px;
+
+    margin-top: .35rem;
+
+    border-radius: 50%;
+
+    background:
+        var(--sage, #4F9D6E);
+}
+
+
+.is-detected .rx-dot {
+
+    background:
+        var(--coral, #F4A88B);
+}
+
+
+.rx-result h3 {
+
+    margin: 0 0 .25rem;
+
+    font-family:
+        'Space Grotesk', sans-serif;
+
+    font-size: 1rem;
+
+    color: #1E2D3D;
+}
+
+
+.rx-result p {
+
+    margin: 0;
+
+    color: #5B6D7A;
+
+    font-size: .82rem;
+
+    line-height: 1.45;
+}
+
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 700px) {
+
+    .rx-eyebrow,
+    .rx-title,
+    .rx-sub {
+
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+
+    .rx-title {
+
+        font-size: 1.9rem;
+    }
+
+
+    .rx-pulse {
+
+        width:
+            calc(100% - 2rem);
+    }
+
+
+    .rx-card {
+
+        margin: 1rem;
+
+        padding: .9rem;
+    }
+
+
+    .rx-card fieldset {
+
+        padding: .85rem;
+
+        margin-bottom: .75rem;
+    }
+
+
+    .rx-grid {
+
+        grid-template-columns: 1fr;
+
+        row-gap: .75rem;
+    }
+
+
+    .action-bar {
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+
+    .action-bar .btn,
+    .action-bar .rx-submit {
+
+        width: 100%;
+
+        min-width: 0;
+    }
+
+
+    .rx-result {
+
+        padding: .9rem;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<p class="rx-eyebrow">
+    Cardiovascular risk assessment
+</p>
+
+<h1 class="rx-title">
+    Heart disease prediction
+</h1>
+
+<p class="rx-sub">
+    Enter the patient's vitals and cardiac test results below.
+    The model estimates the likelihood of heart disease from these clinical indicators.
+</p>
+
+
+<svg class="rx-pulse"
+     viewBox="0 0 700 36"
+     preserveAspectRatio="none"
+     aria-hidden="true">
+
+    <path d="M0,18 L220,18 L245,4 L268,32 L292,10 L312,18 L700,18" />
+
+</svg>
+
+
+<div class="rx-card">
+
+    <form method="POST" novalidate>
+
+        {% csrf_token %}
+
+
+        <!-- =====================================
+             PATIENT PROFILE
+        ====================================== -->
+
+        <fieldset>
+
+            <legend>
+                Patient profile
+            </legend>
+
+            <div class="rx-grid">
+
+                <div class="rx-field">
+
+                    <label for="age">
+                        Age
+                        <span class="unit">(years)</span>
+                    </label>
+
+                    <input
+                        id="age"
+                        name="age"
+                        type="number"
+                        min="0"
+                        max="120"
+                        placeholder="54"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="rx-field">
+
+                    <label for="sex">
+                        Sex
+                    </label>
+
+                    <select
+                        id="sex"
+                        name="sex"
+                        required
+                    >
+
+                        <option value="1">
+                            Male
+                        </option>
+
+                        <option value="0">
+                            Female
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </fieldset>
+
+
+        <!-- =====================================
+             VITALS
+        ====================================== -->
+
+        <fieldset>
+
+            <legend>
+                Vitals
+            </legend>
+
+            <div class="rx-grid">
+
+                <div class="rx-field">
+
+                    <label for="trestbps">
+                        Resting blood pressure
+                        <span class="unit">(mmHg)</span>
+                    </label>
+
+                    <input
+                        id="trestbps"
+                        name="trestbps"
+                        type="number"
+                        placeholder="130"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="rx-field">
+
+                    <label for="chol">
+                        Cholesterol
+                        <span class="unit">(mg/dL)</span>
+                    </label>
+
+                    <input
+                        id="chol"
+                        name="chol"
+                        type="number"
+                        placeholder="246"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="rx-field">
+
+                    <label for="fbs">
+                        Fasting blood sugar &gt; 120 mg/dL
+                    </label>
+
+                    <select
+                        id="fbs"
+                        name="fbs"
+                        required
+                    >
+
+                        <option value="0">
+                            No
+                        </option>
+
+                        <option value="1">
+                            Yes
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="rx-field">
+
+                    <label for="thalach">
+                        Max heart rate achieved
+                        <span class="unit">(bpm)</span>
+                    </label>
+
+                    <input
+                        id="thalach"
+                        name="thalach"
+                        type="number"
+                        placeholder="150"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+        </fieldset>
+
+
+        <!-- =====================================
+             CARDIAC MARKERS
+        ====================================== -->
+
+        <fieldset>
+
+            <legend>
+                Cardiac markers
+            </legend>
+
+            <div class="rx-grid">
+
+                <div class="rx-field">
+
+                    <label for="cp">
+                        Chest pain type
+                    </label>
+
+                    <input
+                        id="cp"
+                        name="cp"
+                        type="number"
+                        min="0"
+                        max="3"
+                        placeholder="0"
+                        required
+                    >
+
+                    <span class="hint">
+                        Code 0–3, per dataset key
+                    </span>
+
+                </div>
+
+
+                <div class="rx-field">
+
+                    <label for="restecg">
+                        Resting ECG result
+                    </label>
+
+                    <input
+                        id="restecg"
+                        name="restecg"
+                        type="number"
+                        min="0"
+                        max="2"
+                        placeholder="1"
+                        required
+                    >
+
+                    <span class="hint">
+                        Code 0–2, per dataset key
+                    </span>
+
+                </div>
+
+
+                <div class="rx-field">
+
+                    <label for="exang">
+                        Exercise-induced angina
+                    </label>
+
+                    <select
+                        id="exang"
+                        name="exang"
+                        required
+                    >
+
+                        <option value="0">
+                            No
+                        </option>
+
+                        <option value="1">
+                            Yes
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="rx-field">
+
+                    <label for="oldpeak">
+                        ST depression (oldpeak)
+                    </label>
+
+                    <input
+                        id="oldpeak"
+                        name="oldpeak"
+                        type="number"
+                        step="0.1"
+                        placeholder="1.0"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="rx-field">
+
+                    <label for="ca">
+                        Major vessels colored
+                    </label>
+
+                    <input
+                        id="ca"
+                        name="ca"
+                        type="number"
+                        min="0"
+                        max="4"
+                        placeholder="0"
+                        required
+                    >
+
+                    <span class="hint">
+                        Fluoroscopy count, 0–4
+                    </span>
+
+                </div>
+
+
+                <div class="rx-field">
+
+                    <label for="thal">
+                        Thalassemia
+                    </label>
+
+                    <input
+                        id="thal"
+                        name="thal"
+                        type="number"
+                        min="0"
+                        max="3"
+                        placeholder="2"
+                        required
+                    >
+
+                    <span class="hint">
+                        Code per dataset key
+                    </span>
+
+                </div>
+
+            </div>
+
+        </fieldset>
+
+
+        <!-- =====================================
+             ACTION BUTTONS
+        ====================================== -->
+
+        <div class="action-bar">
+
+            <button
+                type="button"
+                class="btn btn-outline"
+                onclick="window.history.back()"
+            >
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Back
+
+            </button>
+
+
+            <button
+                type="button"
+                id="clearButton"
+                class="btn btn-neutral"
+            >
+
+                <i class="fa-solid fa-rotate-left"></i>
+
+                Clear
+
+            </button>
+
+
+            <button
+                class="rx-submit"
+                type="submit"
+            >
+
+                <i class="fa-solid fa-heart-pulse"></i>
+
+                Predict risk
+
+            </button>
+
+        </div>
+
+
+        {% if result %}
+
+        <div class="rx-result
+            {% if result == 'Heart Disease Detected' %}
+                is-detected
+            {% else %}
+                is-clear
+            {% endif %}
+        ">
+
+            <span class="rx-dot"></span>
+
+            <div>
+
+                <h3>
+                    {{ result }}
+                </h3>
+
+                <p>
+                    Based on the values entered above.
+                    This is a model estimate, not a diagnosis —
+                    confirm with a clinician.
+                </p>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </form>
+
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const clearButton = document.getElementById("clearButton");
+    const form = document.querySelector(".rx-card form");
+
+    if (clearButton && form) {
+
+        clearButton.addEventListener("click", function () {
+
+            // Clear all input fields
+            form.querySelectorAll("input").forEach(function (input) {
+
+                if (
+                    input.type !== "submit" &&
+                    input.type !== "button" &&
+                    input.type !== "hidden"
+                ) {
+                    input.value = "";
+                }
+
+            });
+
+            // Reset all select fields
+            form.querySelectorAll("select").forEach(function (select) {
+                select.selectedIndex = 0;
+            });
+
+        });
+
+    }
+
+});
+</script>
+
+
+{% endblock %}
+
